@@ -1,0 +1,128 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>Workflow</title>
+<style type="text/css">
+<!--
+body,td,th {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+}
+.style3 {
+	font-size: 16px;
+	font-weight: bold;
+}
+.style10 { font-size: 12px; font-weight: bold; }
+-->
+</style></head>
+
+<body>
+<table width="767" border="0" cellpadding="0" cellspacing="0" bordercolor="#000000">
+  <!--DWLayoutTable-->
+  
+  <tr>
+    <td width="755" height="20" align="center" valign="middle" class="style3">Bloqueio do Pr&eacute; Pedido</td>
+  </tr>
+  <tr>
+    <td height="20"><table width="100%" border="1" cellpadding="0" cellspacing="0">
+      <tr>
+        <td width="65"  valign="middle" bordercolor="#000000"><span class="style10">Filial:</span> %FILIAL%</td>
+        <td width="92"  valign="middle" bordercolor="#000000"><span class="style10">Empresa:</span> %EMPRES%</td>
+        <td width="265" valign="middle" bordercolor="#000000"><span class="style10">Tipo Pedido:</span> %TIPO%</td>
+        <td width="139" valign="middle" bordercolor="#000000"><span class="style10">Emiss&atilde;o:</span> %EMISSA%</td>
+        <td width="194" valign="middle" bordercolor="#000000"><span class="style10">Pedido Gerado:</span> %SC5NUM%</td>
+    
+      </tr>
+    </table></td>
+  </tr>
+  <tr>
+    <td height="20"><table width="100%" border="1" cellpadding="0" cellspacing="0">
+      <tr>
+        <td width="186" valign="middle" bordercolor="#000000"><span class="style10">Cliente:</span> %CLINTE%</td>
+        <td width="205" valign="middle" bordercolor="#000000"><span class="style10">Loja:</span> %LOJCLI%</td>
+        <td width="205" valign="middle" bordercolor="#000000"><span class="style10">Nome:</span> %NOMECLI%</td>
+        <td width="153" valign="middle" bordercolor="#000000"><span class="style10">Tipo:</span> %TIPCLI%</td>
+
+      </tr>
+    </table></td>
+  </tr>
+  <tr>
+    <td height="20"><table width="100%" border="1" align="center" cellpadding="0" cellspacing="0">
+      <tr>
+        <td width="129" valign="middle" bordercolor="#000000"><span class="style10">Cond. Pag.:</span> %CONDPA%</td>
+        <td width="141" valign="middle" bordercolor="#000000"><span class="style10">Desconto 1:</span> %DESC1% %</td>
+        <td width="141" valign="middle" bordercolor="#000000"><span class="style10">Vendedor 1: </span>%VEND1%</td>
+        <td width="125" valign="middle" bordercolor="#000000"><span class="style10">Tabela:</span> %TABELA%</td>
+        <td width="219" valign="middle" bordercolor="#000000"><span class="style10">Pedido Gerado:</span> %SC5NUM%</td>
+      </tr>
+    </table></td>
+  </tr>
+  <tr>
+    <td height="20" align="center" valign="middle"><table width="100%" border="1" cellpadding="0" cellspacing="0">
+      <tr>
+        <td width="247" valign="middle" bordercolor="#000000"><span class="style10">Data Programado:</span> %DTPDPR%</td>
+        <td width="274" valign="middle" bordercolor="#000000"><span class="style10">Data Avalia&ccedil;&atilde;o Manual</span>: %DTMAN%</td>
+        <td width="238" valign="middle" bordercolor="#000000"><span class="style10">Hora Avali&ccedil;&atilde;o Manual:</span> %HRMAN%</td>
+        </tr>
+    </table></td>
+  </tr>
+  <tr>
+    <td height="20" align="center" valign="middle"><table width="100%" border="1" cellpadding="0" cellspacing="0">
+      <tr>
+        <td width="186" valign="middle" bordercolor="#000000"><span class="style10">Usu&aacute;rio Lib. Manual:</span> %USUMAN%</td>
+        </tr>
+    </table></td>
+  </tr>
+  <tr>
+    <td height="20" align="center" valign="middle"><!--DWLayoutEmptyCell-->&nbsp;</td>
+  </tr>
+</table>
+<table width="768" border="1" cellpadding="0" cellspacing="0" bordercolor="#000000">
+  <!--DWLayoutTable-->
+  <tr>
+    <td width="89"  height="19" align="center" valign="middle" class="style10">ITEM</span></td>
+    <td width="55"  height="19" align="center" valign="middle" class="style10">COD</span></td>
+    <td width="92"  height="19" align="center" valign="middle" class="style10">DESC</span></td>
+    <td width="102" height="19" align="center" valign="middle" class="style10">QUANT</span></td>
+    <td width="23"  height="19" align="center" valign="middle" class="style10">UM</td>
+    <td width="69"  height="19" align="center" valign="middle" class="style10">PRC LISTA</td>
+    <td width="42"  height="19" align="center" valign="middle" class="style10">PRC VENDA</td>
+    <td width="69"  height="19" align="center" valign="middle" class="style10">OPERA&Ccedil;&Atilde;O</td>
+    <td width="57"  height="19" align="center" valign="middle" class="style10">ENTREGA</td>
+    <td width="148" height="19" align="center" valign="middle" class="style10">LOCAL</td>
+    <td width="148" height="19" align="center" valign="middle" class="style10">TES</td>
+  </tr>
+  <tr>
+    <td height="19" align="center" valign="middle" nowrap="nowrap" bordercolor="#000000">%it.Item%</td>
+    <td height="19" align="center" valign="middle" nowrap="nowrap" bordercolor="#000000">%it.Cod%</td>
+    <td height="19" align="center" valign="middle" nowrap="nowrap" bordercolor="#000000">%it.Descr%</td>
+    <td height="19" align="center" valign="middle" nowrap="nowrap" bordercolor="#000000">%it.Quant%</td>
+    <td height="19" align="center" valign="middle" nowrap="nowrap" bordercolor="#000000">%it.UM%</td>
+    <td height="19" align="center" valign="middle" nowrap="nowrap" bordercolor="#000000">%it.PrcLis%</td>
+    <td height="19" align="center" valign="middle" nowrap="nowrap" bordercolor="#000000">%it.PrcVen%</td>
+    <td height="19" align="center" valign="middle" nowrap="nowrap" bordercolor="#000000">%it.Oper%</td>
+    <td height="19" align="center" valign="middle" nowrap="nowrap" bordercolor="#000000">%it.Entreg%</td>
+    <td height="19" align="center" valign="middle" nowrap="nowrap" bordercolor="#000000">%it.Local%</td>
+    <td height="19" align="center" valign="middle" nowrap="nowrap" bordercolor="#000000">%it.TES%</td>
+  </tr>
+</table>
+<p class="style10">Observa&ccedil;&otilde;es:</p>
+<table width="768" border="1" cellpadding="0" cellspacing="0" bordercolor="#000000">
+  <!--DWLayoutTable-->
+  <tr>
+    <td width="76" align="center" valign="middle" class="style10">Data</td>
+    <td width="80" align="center" valign="middle" class="style10">Hora</td>
+    <td width="120" align="center" valign="middle" class="style10">Usu&aacute;rio</td>
+    <td width="482"  height="19" align="center" valign="middle" class="style10">Observa&ccedil;&atilde;o</span></td>
+  </tr>
+  <tr>
+    <td align="left" valign="middle" nowrap="nowrap" bordercolor="#000000">%ob.Data%</td>
+    <td align="left" valign="middle" nowrap="nowrap" bordercolor="#000000">%ob.Hora%</td>
+    <td align="left" valign="middle" nowrap="nowrap" bordercolor="#000000">%ob.Usr%</td>
+    <td height="19" align="left" valign="middle" nowrap="nowrap" bordercolor="#000000">%ob.OBS%</td>
+  </tr>
+</table>
+<p>&nbsp;</p>
+</body>
+</html>
