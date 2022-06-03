@@ -1,0 +1,259 @@
+#Include "Protheus.Ch"
+#Include "Report.Ch"
+#include "Rwmake.ch"
+#include "Ap5mail.ch"
+#include "Topconn.ch"
+#include "TbiConn.ch"
+#include "TbiCode.ch"
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³ RTFIS	³ Autor ³ Jorge Tavares         ³ Data ³ 02/10/13 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Relacao de CFOP(s) x unidade de negocios 				  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Uso       ³                                                            ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+User Function RTFIS()
+
+Local oReport
+
+If FindFunction("TRepInUse") .And. TRepInUse()
+	//-- Interface de impressao
+	oReport := ReportDef()
+	oReport:PrintDialog()
+EndIf
+
+Return
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³ReportDef ³ Autor ³ Jorge Tavares         ³ Data ³02/10/2013³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³A funcao estatica ReportDef devera ser criada para todos os ³±±
+±±³          ³relatorios que poderao ser agendados pelo usuario.          ³±±
+±±³          ³ Definicoes do Relatorio.                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³ExpO1: Objeto do relatorio                                  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³Nenhum                                                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³   DATA   ³ Programador   ³Manutencao efetuada                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³          ³               ³                                            ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function ReportDef()
+
+Local cAliasQry  	:= GetNextAlias()
+Local cPerg 		:= "RTFIS"
+Local oReport
+Local oSection1
+ 
+CriaSx1(cPerg)
+Pergunte(cPerg,.F.)
+
+oReport := TReport():New("RTFIS","Relacao de CFOPs x Unidade de Negocios",cPerg, {|oReport| ReportPrint(oReport,cAliasQry)},;
+"Este programa tem como objetivo imprimir relatorio de acordo com os parametros informados pelo usuario. Impostos Fiscais")
+
+oReport:SetLandScape(.T.)
+oReport:SetTotalInLine(.F.) // Imprime o total em linhas
+
+// Secao Principal
+oSection1 	:= TRSection():New(oReport,,{"SFT"},/*{Array com as ordens do relatório}*/,/*Campos do SX3*/,/*Campos do SIX*/)
+
+TRCell():New(oSection1,"UNINEG"	,"SD1","Unid. Negocios"/*Alltrim(RetTitle("D1_ITEMCTA"))*/	,PesqPict("SD1","D1_ITEMCTA")	,TamSX3("D1_ITEMCTA")[1],/*lPixel*/,{|| (cAliasQry)->ITEMCC })
+TRCell():New(oSection1,"FT_CFOP"	,"SFT","CFOP"/*Alltrim(RetTitle("FT_CFOP"))*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,{|| (cAliasQry)->CFOP })
+TRCell():New(oSection1,"VALCONT"	,"SFT","Val. Cont."/*Alltrim(RetTitle("FT_VALCONT"))*/	,PesqPict("SFT","FT_VALCONT")	,TamSX3("FT_VALCONT")[1],/*lPixel*/,{|| (cAliasQry)->VALCONT })
+TRCell():New(oSection1,"BASEICM"	,"SFT","Base Icms",PesqPict("SFT","FT_BASEICM")	,TamSX3("FT_BASEICM")[1],/*lPixel*/,{|| (cAliasQry)->BASEICM })
+TRCell():New(oSection1,"ICMS"		,"SFT","ICMS",PesqPict("SFT","FT_VALICM")	,TamSX3("FT_VALICM")[1],/*lPixel*/,{|| (cAliasQry)->ICMS })
+TRCell():New(oSection1,"BASEIPI"	,"SFT","Base IPI",PesqPict("SFT","FT_BASEIPI")	,TamSX3("FT_BASEIPI")[1],/*lPixel*/,{|| (cAliasQry)->BASEIPI })
+TRCell():New(oSection1,"VALIPI"		,"SFT","Val. IPI",PesqPict("SFT","FT_VALIPI")	,TamSX3("FT_VALIPI")[1],/*lPixel*/,{|| (cAliasQry)->VALIPI })
+TRCell():New(oSection1,"ICMSRET"	,"SFT","ICMS Ret.",PesqPict("SFT","FT_ICMSRET")	,TamSX3("FT_ICMSRET")[1],/*lPixel*/,{|| (cAliasQry)->ICMSRET })
+TRCell():New(oSection1,"TOTPROD"	,"SFT","Tot. Prod.",PesqPict("SFT","FT_TOTAL")	,TamSX3("FT_TOTAL")[1],/*lPixel*/,{|| (cAliasQry)->TOTPROD })
+TRCell():New(oSection1,"DESPESA"	,"SFT","Despesa",PesqPict("SFT","FT_DESPESA")	,TamSX3("FT_DESPESA")[1],/*lPixel*/,{|| (cAliasQry)->DESPESA })
+TRCell():New(oSection1,"BASEPIS"	,"SFT","Base PIS",PesqPict("SFT","FT_BASEPIS")	,TamSX3("FT_BASEPIS")[1],/*lPixel*/,{|| (cAliasQry)->BASEPIS })
+TRCell():New(oSection1,"VALPIS"		,"SFT","Val. PIS",PesqPict("SFT","FT_VALPIS")	,TamSX3("FT_VALPIS")[1],/*lPixel*/,{|| (cAliasQry)->VALPIS })
+TRCell():New(oSection1,"BASECOF"	,"SFT","Base COF",PesqPict("SFT","FT_BASECOF")	,TamSX3("FT_BASECOF")[1],/*lPixel*/,{|| (cAliasQry)->BASECOF })
+TRCell():New(oSection1,"VALCOF"		,"SFT","Val. COF",PesqPict("SFT","FT_VALCOF")	,TamSX3("FT_VALCOF")[1],/*lPixel*/,{|| (cAliasQry)->VALCOF })
+
+oSection1:Cell("VALCONT"):SetHeaderAlign("RIGHT")       
+oSection1:Cell("BASEICM"):SetHeaderAlign("RIGHT")       
+oSection1:Cell("ICMS"):SetHeaderAlign("RIGHT")
+oSection1:Cell("BASEIPI"):SetHeaderAlign("RIGHT")
+oSection1:Cell("VALIPI"):SetHeaderAlign("RIGHT")
+oSection1:Cell("ICMSRET"):SetHeaderAlign("RIGHT")
+oSection1:Cell("TOTPROD"):SetHeaderAlign("RIGHT")
+oSection1:Cell("DESPESA"):SetHeaderAlign("RIGHT")
+oSection1:Cell("BASEPIS"):SetHeaderAlign("RIGHT")
+oSection1:Cell("VALIPI"):SetHeaderAlign("RIGHT")
+oSection1:Cell("VALPIS"):SetHeaderAlign("RIGHT")
+oSection1:Cell("BASECOF"):SetHeaderAlign("RIGHT")
+oSection1:Cell("VALCOF"):SetHeaderAlign("RIGHT")
+
+Return(oReport)
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³ReportPrint ³ Autor ³ Jorge Tavares         ³ Data ³02/10/2013³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³Funcao que imprime as linhas detalhes do relatorio            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³Nenhum                                                        ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ExpO1: Objeto Report do Relatório                             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³   DATA   ³ Programador   ³Manutencao efetuada                           ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³          ³               ³                                              ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function ReportPrint(oReport,cAliasQry)
+
+Local aSRD 		:= {}
+Local cInicio	:= DtoS(mv_par01)
+Local cFim		:= DtoS(mv_par02)
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Query do relatório da secao 1                                           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oReport:Section(1):BeginQuery()
+
+BeginSql Alias cAliasQry
+	Column FT_VALCONT as Numeric(11,2), FT_BASEICM as Numeric(11,2), BASEICM as Numeric(11,2)
+	Column BASEICM as Numeric(11,2), ICMS as Numeric(11,2)
+	Column BASEIPI as Numeric(11,2), VALIPI as Numeric(11,2), ICMSRET as Numeric(11,2), TOTPROD as Numeric(11,2)
+	Column DESPESA as Numeric(11,2), BASEPIS as Numeric(11,2), VALPIS as Numeric(11,2), BASECOF as Numeric(11,2), VALCOF as Numeric(11,2)
+	Column EMISSAO as Date
+	%NoParser%
+SELECT 	FILIAL ,ITEMCC  ,CFOP
+           	,SUM(VALCONT) AS VALCONT        ,SUM(BASEICM) AS BASEICM
+			,SUM(ICMS)AS ICMS   			,SUM(BASEIPI) AS BASEIPI            ,SUM(VALIPI)  AS VALIPI
+            ,SUM(ICMSRET) AS ICMSRET        ,SUM(TOTPROD) AS TOTPROD            ,SUM(DESPESA) AS DESPESA
+            ,SUM(BASEPIS) AS BASEPIS        ,SUM(VALPIS)  AS VALPIS		         ,SUM(BASECOF) AS BASECOF
+            ,SUM(VALCOF)  AS VALCOF 
+FROM V_FISCAIS_UNID_NEG /* View criada no Banco de Dados pelo Gilberto (TI) */
+WHERE 
+FILIAL = %xFilial:SFT%
+AND EMISSAO BETWEEN %Exp:cInicio% AND %Exp:cFim%
+
+GROUP BY FILIAL, ITEMCC, CFOP 
+ORDER BY FILIAL, ITEMCC, CFOP
+EndSql
+
+oReport:Section(1):EndQuery()
+
+//Imprimi Query no Servidor
+aSRD := GetLastQuery()
+
+oReport:Section(1):Init()
+
+PQuery(cAliasQry,oReport) //Imprime
+
+oReport:Section(1):Finish() 
+ 
+Return
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³ PQuery	³ Autor ³ Jorge Tavares         ³ Data ³ 04/10/13 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Funcao para imprimir a Query				 				  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Uso       ³                                                            ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+Static Function PQuery(cAliasQry,oReport)
+
+Local Section1  := oReport:Section(1)
+Local oBreak
+Local oBreak2
+
+oBreak := TRBreak():New(Section1, {||  Alltrim((cAliasQry)->CFOP) > "5000"   }/*Quebra*/,;
+	 {|| "Total por CFOP(s)... " /*  Iif ( ((cAliasQry)->D1_ITEMCTA = "PROART"), "Total PROART", IIF ( ((cAliasQry)->D1_ITEMCTA = "CORP"), "Total CORP" , "Total TAIFF")   )*/ })
+
+oBreak2 := TRBreak():New(Section1, {|| (cAliasQry)->ITEMCC }/*Quebra*/,	 {|| "Total por Unidade de Negocios " })
+
+TRFunction():New(Section1:Cell("VALCONT"),"","SUM",oBreak,,,,.F.,.F.)
+TRFunction():New(Section1:Cell("VALCONT"),"","SUM",oBreak2,,,,.F.,.F.)
+TRFunction():New(Section1:Cell("BASEICM"),"","SUM",oBreak,,,,.F.,.F.)
+TRFunction():New(Section1:Cell("BASEICM"),"","SUM",oBreak2,,,,.F.,.F.)
+TRFunction():New(Section1:Cell("ICMS"),"","SUM",oBreak,,,,.F.,.F.)
+TRFunction():New(Section1:Cell("ICMS"),"","SUM",oBreak2,,,,.F.,.F.)
+TRFunction():New(Section1:Cell("BASEIPI"),"","SUM",oBreak,,,,.F.,.F.)
+TRFunction():New(Section1:Cell("BASEIPI"),"","SUM",oBreak2,,,,.F.,.F.)
+TRFunction():New(Section1:Cell("VALIPI"),"","SUM",oBreak,,,,.F.,.F.)
+TRFunction():New(Section1:Cell("VALIPI"),"","SUM",oBreak2,,,,.F.,.F.)
+TRFunction():New(Section1:Cell("ICMSRET"),"","SUM",oBreak,,,,.F.,.F.)
+TRFunction():New(Section1:Cell("ICMSRET"),"","SUM",oBreak2,,,,.F.,.F.)
+TRFunction():New(Section1:Cell("TOTPROD"),"","SUM",oBreak,,,,.F.,.F.)
+TRFunction():New(Section1:Cell("TOTPROD"),"","SUM",oBreak2,,,,.F.,.F.)
+TRFunction():New(Section1:Cell("DESPESA"),"","SUM",oBreak,,,,.F.,.F.)
+TRFunction():New(Section1:Cell("DESPESA"),"","SUM",oBreak2,,,,.F.,.F.)
+TRFunction():New(Section1:Cell("BASEPIS"),"","SUM",oBreak,,,,.F.,.F.)
+TRFunction():New(Section1:Cell("BASEPIS"),"","SUM",oBreak2,,,,.F.,.F.)
+TRFunction():New(Section1:Cell("VALPIS"),"","SUM",oBreak,,,,.F.,.F.)
+TRFunction():New(Section1:Cell("VALPIS"),"","SUM",oBreak2,,,,.F.,.F.)
+TRFunction():New(Section1:Cell("BASECOF"),"","SUM",oBreak,,,,.F.,.F.)
+TRFunction():New(Section1:Cell("BASECOF"),"","SUM",oBreak2,,,,.F.,.F.)
+TRFunction():New(Section1:Cell("VALCOF"),"","SUM",oBreak,,,,.F.,.F.)
+TRFunction():New(Section1:Cell("VALCOF"),"","SUM",oBreak2,,,,.F.,.F.)
+
+dbSelectArea(cAliasQry)
+dBGotop()
+
+oReport:SetMeter((cAliasQry)->(LastRec()))
+
+Do While !(cAliasQry)->( Eof() )
+	
+	oReport:Section(1):PrintLine()
+	
+	(cAliasQry)->( DbSkip() )
+	oReport:IncMeter()
+EndDo
+
+Return
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³CriaSx1   ºAutor  ³   	    		 º Data ³ OUT/2013    º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.     ³Rotina para criaçao do grupo de perguntas	  		          º±±
+±±º                  .				                                      º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³                                            	              º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Static Function CriaSx1(cPerg)
+
+Local aRegs := {}
+
+//ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+//MV_PAR01 - Periodo De
+//MV_PAR02 - Periodo Ate
+//±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+//ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+
+
+//Estrutura {Grupo	/Ordem	/Pergunta    	/Pergunta Espanhol	/Pergunta Ingles		/Variavel	/Tipo	/Tamanho/Decimal	/Presel	/GSC	     /Valid									  				/Var01	/Def01		/DefSpa1	/DefEng1	/Cnt01	/Var02	/Def02		/DefSpa2	/DefEng2	/Cnt02	/Var03	/Def03	/DefSpa3	/DefEng3	/Cnt03	/Var04	/Def04	/DefSpa4	/DefEng4	/Cnt04	/Var05	/Def05	/DefSpa5	/DefEng5	/Cnt05	/F3		/PYME	/GRPSX6	/HELP}
+Aadd(aRegs,{cPerg	,"01"	,"Periodo De   ? ", " Periodo De   ? "	,"Periodo De   ? " 		,"mv_ch1"	,"D"	, 08	,0			,0		,"G"	,"!Empty(MV_PAR01)"										,"mv_par01" ,""			,""			,""			,""		,""		,""			,""			,""			,""		,""		,""		,""	  		,""			,""		,""		,""		,""			,""			,""		,""		,""		,""			,""			,""		,""		,"S"	,""		,""	})
+Aadd(aRegs,{cPerg	,"02"	,"Periodo Ate  ? ", " Periodo Ate  ? "  ,"Periodo Ate  ? "		,"mv_ch2"	,"D"	, 08	,0			,0		,"G"	,"!Empty(MV_PAR02) .And. DTOS(MV_PAR02)>=DTOS(MV_PAR01)","mv_par02",""			,""			,""			,""		,""		,""			,""			,""			,""		,""		,""		,""	  		,""			,""		,""		,""		,""			,""			,""		,""		,""		,""			,""			,""		,""		,"S"	,""		,""	})
+
+lValidPerg( aRegs )
+
+Return

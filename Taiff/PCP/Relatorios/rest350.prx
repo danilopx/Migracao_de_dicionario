@@ -1,0 +1,812 @@
+#INCLUDE "REST350.CH"
+#INCLUDE "PROTHEUS.CH"
+User Function TREST350()
+	Local oReport
+	
+	oReport:= ReportDef()
+	oReport:PrintDialog()
+	
+	Return
+
+Static Function ReportDef()
+	Local aOrdem    := {"Por Ordem de Producao", "Por Produto"}
+	Local cPictQt   := PesqPict("SB2","B2_QATU")
+	Local nTamQt    := TamSX3('B2_QATU')[1]
+	Local cAliasTRB := GetNextAlias()
+	Local oCabec
+	Local oFaltas
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Criacao do componente de impressao                                      ³
+	//³                                                                        ³
+	//³TReport():New                                                           ³
+	//³ExpC1 : Nome do relatorio                                               ³
+	//³ExpC2 : Titulo                                                          ³
+	//³ExpC3 : Pergunte                                                        ³
+	//³ExpB4 : Bloco de codigo que sera executado na confirmacao da impressao  ³
+	//³ExpC5 : Descricao                                                       ³
+	//³                                                                        ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	oReport:= TReport():New("MATR350","Lista de Faltas","MTR350", {|oReport| ReportPrint(oReport,aOrdem,cAliasTRB)},"O relatorio fara' a alocacao do material em estoque `as OP's"+" "+"em ordem sequencial ,deixando que as faltas sejam localizadas"+" "+"nas ultimas OP's.")
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Verifica as perguntas selecionadas                           ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Variaveis utilizadas para parametros                          ³
+	//³ mv_par01     // Produto inicial                               ³
+	//³ mv_par02     // Produto final                                 ³
+	//³ mv_par03     // Considera saldo entradas em aberto            ³
+	//³ mv_par04     // Lista somente registros com saldo neg         ³
+	//³ mv_par05     // Almoxarifado de (para formacao do saldo Ini)  ³
+	//³ mv_par06     // Almoxarifado Ate(para formacao do saldo Ini)  ³
+	//³ mv_par07     // Considera OPs 1- Firmes 2- Previstas 3- Ambas ³
+	//³ mv_par08     // Apenas SCs com data limite de compra em atraso³
+	//³ mv_par09     // Da Ordem de Producao                          ³
+	//³ mv_par10     // Ate a Ordem de Producao                       ³
+	//³ mv_par11     // Listar as OPs 1.Atendidas/N Atendidas/Ambas   ³
+	//³ mv_par12     // Qtd. Nossa Poder 3o.  1-Ignora / 2-Soma       ³
+	//³ mv_par13     // Qtd. 3o. Nosso Poder  1-Ignora / 2-Subtrai    ³
+	//³ mv_par14     // Utiliza Data                                  ³
+	//³ mv_par15     // Data de referencia                            ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	AjustaSX1()
+	Pergunte(oReport:uParam,.F.)
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Criacao da secao utilizada pelo relatorio                               ³
+	//³                                                                        ³
+	//³TRSection():New                                                         ³
+	//³ExpO1 : Objeto TReport que a secao pertence                             ³
+	//³ExpC2 : Descricao da seçao                                              ³
+	//³ExpA3 : Array com as tabelas utilizadas pela secao. A primeira tabela   ³
+	//³        sera considerada como principal para a seção.                   ³
+	//³ExpA4 : Array com as Ordens do relatório                                ³
+	//³ExpL5 : Carrega campos do SX3 como celulas                              ³
+	//³        Default : False                                                 ³
+	//³ExpL6 : Carrega ordens do Sindex                                        ³
+	//³        Default : False                                                 ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	oCabec := TRSection():New(oReport,"Produtos",{'SB1'},aOrdem) //"Lista de Faltas"##"Produtos"
+	oCabec:SetTotalInLine(.F.)
+	
+	TRCell():New(oCabec,'B1_COD'		,'SB1',"Componente ",/*Picture*/	,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+	TRCell():New(oCabec,'B1_DESC'		,'SB1',"Descricao ",/*Picture*/	,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+	TRCell():New(oCabec,'B1_TIPO'		,'SB1',"Tipo ",/*Picture*/	,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+	TRCell():New(oCabec,'B1_GRUPO'		,'SB1',"Grupo ",/*Picture*/	,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+	TRCell():New(oCabec,'SALDO'			,'   ',"Saldo Atual",cPictQt		,nTamQt		,/*lPixel*/,/*{|| code-block de impressao }*/)
+	
+	oFaltas := TRSection():New(oCabec,"Empenhos",{'SD4','SB1',cAliasTRB},aOrdem) //"Empenhos"
+	oFaltas:SetTotalInLine(.F.)
+	
+	TRCell():New(oFaltas,'TIPO'			,cAliasTRB	,"E/S"	 			,/*Picture*/,01				,/*lPixel*/,/*{|| code-block de impressao }*/)
+	TRCell():New(oFaltas,'TIPODOC'		,cAliasTRB	,"TIP"+CRLF+"DOC"	,/*Picture*/,02				,/*lPixel*/,/*{|| code-block de impressao }*/)
+	TRCell():New(oFaltas,'DOCUMENTO'	,cAliasTRB	,"DOCUMENTO"				,/*Picture*/,12				,/*lPixel*/,/*{|| code-block de impressao }*/)
+	TRCell():New(oFaltas,'EMISSAO'		,cAliasTRB	,"DATA DE"+CRLF+"EMISSÃO"	,/*Picture*/,10				,/*lPixel*/,/*{|| code-block de impressao }*/)
+	TRCell():New(oFaltas,'DTEVENTO'		,cAliasTRB	,"DATA DO"+CRLF+"EVENTO"	,/*Picture*/,10				,/*lPixel*/,/*{|| code-block de impressao }*/)
+	TRCell():New(oFaltas,'B1_COD'		,'SB1'		,"CODIGO"		   		,/*Picture*/,/*Tamanho*/	,/*lPixel*/,/*{|| code-block de impressao }*/)
+	TRCell():New(oFaltas,'B1_DESC'		,'SB1'		,"DESCRIÇÃO"				,/*Picture*/,/*Tamanho*/	,/*lPixel*/,/*{|| code-block de impressao }*/)
+	TRCell():New(oFaltas,'B1_TIPO'		,'SB1'		,"TP"				,/*Picture*/,/*Tamanho*/	,/*lPixel*/,/*{|| code-block de impressao }*/)
+	TRCell():New(oFaltas,'B1_GRUPO'		,'SB1'		,"GRUP"				,/*Picture*/,/*Tamanho*/	,/*lPixel*/,/*{|| code-block de impressao }*/)
+	TRCell():New(oFaltas,'QUANTIDADE'	,cAliasTRB	,"QUANTIDADE"				,cPictQt	,nTamQt			,/*lPixel*/,/*{|| code-block de impressao }*/)
+	TRCell():New(oFaltas,'SALDO'		,cAliasTRB	,"Sld.Disponivel"		,cPictQt	,nTamQt			,/*lPixel*/,/*{|| code-block de impressao }*/)
+	TRCell():New(oFaltas,'DTCOMPRA'		,cAliasTRB	,"DATA DA"+CRLF+"COMPRA"	,/*Picture*/,10				,/*lPixel*/,/*{|| code-block de impressao }*/)
+	
+	oFaltas:SetHeaderPage()
+	
+	Return(oReport)
+
+Static Function ReportPrint(oReport,aOrdem,cAliasTRB)
+	Local oCabec    := oReport:Section(1)
+	Local oFaltas   := oReport:Section(1):Section(1)
+	Local nOrdem    := oCabec:GetOrder()
+	Local aCampos	:= {}
+	Local aTrab		:= {}
+	Local aCampAux	:= {}
+	Local aSCsUsadas:= {}
+	Local cTrtAnt	:= ""
+	Local cOpAnt	:= ""
+	Local cKey		:= ""
+	Local cOP		:= ""
+	Local cIndSC7   := ""
+	Local cFiltro   := ""
+	Local nSeek		:= 0
+	Local nX		:= 0
+	Local nRecno	:= 0
+	Local nAcho		:= 0
+	Local nOrderSC7 := 0
+	Local dDataD4, dData
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Titulo do relatorio                                          ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	oReport:SetTitle(oReport:Title()+IIf(nOrdem == 1," - (Por ordem de producao)", " - (Por Produto)"))
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Define estrutura e gera o arquivo de trabalho                ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	aTrab := {	{"TIPO"      ,"C",01,0},;
+	{"DOCUMENTO" ,"C",12,0},;
+	{"DTEVENTO"  ,"D",08,0},;
+	{"PRODUTO"   ,"C",15,0},;
+	{"QUANTIDADE","N",12,2},;
+	{"EMISSAO"   ,"D",08,0},;
+	{"OP"        ,"C",13,0},;
+	{"TIPODOC"   ,"C",02,0} }
+	
+	If nOrdem == 2
+		cKey := "PRODUTO+DTOS(DTEVENTO)+TIPO"
+	ElseIf nOrdem == 1
+		cKey := "OP+DTOS(DTEVENTO)+PRODUTO"
+	EndIf
+	
+	dbSelectArea(0)
+	dbCreate(cAliasTRB,aTrab)
+	
+	dbUseArea( .F.,,cAliasTRB,cAliasTRB,.F.,.F. )
+	IndRegua(cAliasTRB,cAliasTRB,cKey,,,"Selecionando Registros...")		//"Selecionando Registros..."
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Verifica se deve considerar saldos em aberto das entradas    ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If mv_par03 == 1
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Posiciona nos indices dos arquivos a serem pesquisados       ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		dbSelectArea("SC1")
+		dbSetOrder(2)
+		
+		dbSelectArea("SC2")
+		dbSetOrder(2)
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Novo Indice para pesquisa do SC7.                                      ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		dbSelectArea("SC7")
+		dbSetOrder(1)
+		cIndSC7 := CriaTrab(,.F.)
+		IndRegua("SC7",cIndSC7,"C7_FILIAL+C7_NUMSC+C7_ITEMSC")
+		nOrderSC7 := RetIndex("SC7")+1
+		#IFNDEF TOP
+			SC7->(dbSetIndex(cIndSC7+OrdBagExt()))
+		#ENDIF
+		dbSelectArea("SC8")
+		dbSetOrder(3)
+	EndIf
+	
+	dbSelectArea("SD4")
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Transforma parametros Range em expressao SQL                            ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	MakeAdvplExpr(oReport:uParam)
+	
+	cFiltro := " D4_FILIAL == '"     + xFilial("SD4")	+ "' "
+	cFiltro += ".AND. D4_COD   >= '" + mv_par01 		+ "' "
+	cFiltro += ".AND. D4_COD   <= '" + mv_par02 		+ "' "
+	cFiltro += ".AND. D4_OP    >= '" + mv_par09 		+ "' "
+	cFiltro += ".AND. D4_OP    <= '" + mv_par10		    + "' "
+	cFiltro += ".AND. D4_QUANT > 0 "
+	
+	oFaltas:SetFilter(cFiltro,IndexKey(IIf(nOrdem==1,2,3)))
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Grava as entradas e saidas previstas no arquivo de trabalho  ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	oReport:SetMeter(SD4->(LastRec()))
+	
+	While !oReport:Cancel() .And. !Eof()
+		
+		oReport:IncMeter()
+		
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Nao passam registros encerrados ou com tipo de OP invalido   ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		SC2->(dbSetOrder(1))
+		SC2->(MsSeek(xFilial("SC2")+SD4->D4_OP))
+		SC2->(dbSetOrder(2))
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Consiste a quantidade do empenho de acordo com a ordem (Por  ³
+		//³ Ordem de Producao) e a pergunta 11.                          ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		If !(MtrAvalOP(mv_par07))
+			dbSkip()
+			Loop
+		EndIf
+		
+		cCodAnt  := D4_COD
+		dbSelectArea("SD4")
+		dDataIni := CTOD("  /  /  ")
+		While !oReport:Cancel() .And. !Eof() .And. SD4->D4_FILIAL+SD4->D4_COD == xFilial("SD4")+cCodAnt
+			
+			cTrtAnt  := SD4->D4_TRT
+			
+			//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+			//³ Nao passam registros encerrados ou com tipo de OP invalido   ³
+			//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+			SC2->(dbSetOrder(1))
+			SC2->(MsSeek(xFilial("SC2")+SD4->D4_OP))
+			SC2->(dbSetOrder(2))
+			
+			//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+			//³ Consiste a quantidade do empenho de acordo com a ordem (Por  ³
+			//³ Ordem de Producao) e a pergunta 11.                          ³
+			//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+			If !(MtrAvalOP(mv_par07))
+				dbSkip()
+				Loop
+			EndIf
+			
+			aCampos	:= {}
+			dData   := IIf(mv_par14 == 01 .Or. Empty(mv_par15),SD4->D4_DATA , mv_par15 )
+			dDataD4 := SD4->D4_DATA
+			
+			//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+			//³ Verifica se deve considerar saldos em aberto das entradas    ³
+			//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+			If mv_par03 == 1
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³ Carrega array com Solicitacoes de Compra ou Cotacoes em aberto³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				dbSelectArea("SC1")
+				MsSeek(xFilial("SC1")+cCodAnt)
+				While !oReport:Cancel() .And. !Eof() .And. C1_FILIAL+C1_PRODUTO == xFilial("SC1")+cCodAnt
+					If C1_DATPRF <= dData .And. MtrAvalOP(mv_par07,"SC1")
+						If mv_par08 == 1 .And. (SomaPrazo(C1_DATPRF, - CalcPrazo(C1_PRODUTO, C1_QUANT)) >= dDataBase)
+							dbSkip()
+							Loop
+						EndIf
+						nAcho:=ASCAN(aSCsUsadas,SC1->(Recno()))
+						If nAcho > 0
+							dbSkip()
+							Loop
+						Else
+							aAdd(aSCsUsadas,SC1->(Recno()))
+						EndIf
+						If C1_QUJE < C1_QUANT
+							If !Empty(C1_COTACAO)
+								dbSelectArea("SC8")
+								MsSeek(xFilial("SC8")+SC1->C1_COTACAO+SC1->C1_PRODUTO)
+								If Found() .And. Empty(C8_NUMPED)
+									nSeek := Ascan(aCampos,{|x| x[2] == SC1->C1_COTACAO})
+									If nSeek == 0 .Or. IIf(nSeek>0 .And. aCampos[nSeek,7]#"CT",.T.,.F.)
+										aAdd(aCampos,{ "E",C8_NUM,SC1->C1_DATPRF,C8_PRODUTO,C8_QUANT,C8_EMISSAO,"CT",SC1->C1_OP})
+									EndIf
+								Else
+									dbSelectArea("SC1")
+									aAdd(aCampos,{ "E",C1_NUM,C1_DATPRF,C1_PRODUTO,C1_QUANT-C1_QUJE,C1_EMISSAO,"SC",,SC1->C1_OP})
+								EndIf
+							Else
+								dbSelectArea("SC1")
+								aAdd(aCampos,{ "E",C1_NUM,C1_DATPRF,C1_PRODUTO,C1_QUANT-C1_QUJE,C1_EMISSAO,"SC",SC1->C1_OP})
+							EndIf
+						EndIf
+						//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+						//³ Busca todos os Pedidos de compras SC7 o qual o item do SC1 esteja vinculado.     ³
+						//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+						dbSelectArea("SC7")
+						SC7->(dbSetOrder(nOrderSC7))
+						SC7->(MsSeek(xFilial("SC7")+SC1->C1_NUM+SC1->C1_ITEM))
+						Do While !oReport:Cancel() .And. SC7->(!Eof()) .And. SC7->C7_FILIAL+SC7->C7_NUMSC+SC7->C7_ITEMSC == xFilial("SC7")+SC1->C1_NUM+SC1->C1_ITEM
+							If C7_DATPRF <= dData .And. C7_QUJE < C7_QUANT .And. Empty(C7_RESIDUO) .And. MtrAvalOP(mv_par07,"SC7")
+								aAdd(aCampos,{ "E",C7_NUM,C7_DATPRF,C7_PRODUTO,C7_QUANT-C7_QUJE,C7_EMISSAO,"PC",C7_OP})
+								aAdd(aCampAux,{ "E",C7_NUM,C7_DATPRF,C7_PRODUTO,C7_QUANT-C7_QUJE,C7_EMISSAO,"PC",C7_OP})
+							EndIf
+							dbSkip()
+						EndDo
+					EndIf
+					dbSelectArea("SC1")
+					dbSkip()
+				EndDo
+				
+				dbSelectArea("SC7")
+				dbSetOrder(7)
+				MsSeek(xFilial("SC7")+cCodAnt)
+				While !oReport:Cancel() .And. !Eof() .And. C7_FILIAL+C7_PRODUTO == xFilial("SC7")+cCodAnt
+					If C7_DATPRF <= dData .And. MtrAvalOP(mv_par07,"SC7") .And. C7_QUJE < C7_QUANT .And. Empty(C7_RESIDUO)
+						If mv_par08 == 1 .And. (SomaPrazo(C7_DATPRF, - CalcPrazo(C7_PRODUTO, C7_QUANT)) >= dDataBase)
+							dbSkip()
+							Loop
+						EndIf
+						nAcho :=aScan(aCampAux,{|x| x[1] == "E" .And. x[2] == C7_NUM+C7_ITEM .And. x[3] == C7_DATPRF})  //nAcho :=aScan(aCampAux,{|x| x[1] == "E" .And. x[2] == C7_NUM })
+						If nAcho > 0
+							dbSkip()
+							Loop
+						Else
+							aAdd(aCampos,{ "E",C7_NUM+C7_ITEM,C7_DATPRF,C7_PRODUTO,C7_QUANT-C7_QUJE,C7_EMISSAO,"PC",C7_OP})
+							aAdd(aCampAux,{ "E",C7_NUM+C7_ITEM,C7_DATPRF,C7_PRODUTO,C7_QUANT-C7_QUJE,C7_EMISSAO,"PC",C7_OP})
+						EndIf
+					EndIf
+					dbSelectArea("SC7")
+					dbSkip()
+				EndDo
+				
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³ Carrega array com Ordens de Producao em aberto               ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				dbSelectArea("SC2")
+				MsSeek(xFilial("SC2")+cCodAnt)
+				While !oReport:Cancel() .And. !Eof() .And. C2_FILIAL+C2_PRODUTO == xFilial("SC2")+cCodAnt
+					If C2_DATPRF > dDataIni .And. C2_DATPRF <= dData .And. Empty(C2_DATRF) .And. (C2_QUJE+C2_PERDA) < C2_QUANT .And. MtrAvalOP(mv_par07)
+						If mv_par08 == 1 .And. (SomaPrazo(C2_DATPRF, - CalcPrazo(C2_PRODUTO, C2_QUANT)) >= dDataBase)
+							dbSkip()
+							Loop
+						EndIf
+						aAdd(aCampos,{ "E",C2_NUM+C2_ITEM+C2_SEQUEN+C2_ITEMGRD,C2_DATPRF,C2_PRODUTO,C2_QUANT-C2_QUJE-C2_PERDA,C2_EMISSAO,"OP",C2_NUM+C2_ITEM+C2_SEQUEN+C2_ITEMGRD})
+					EndIf
+					dbSkip()
+				EndDo
+			EndIf
+			
+			//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+			//³ Carrega array com os Empenhos de material                    ³
+			//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+			dbSelectArea("SD4")
+			dDataIni	:= SD4->D4_DATA
+			cOP			:= SD4->D4_OP
+			cOpAnt		:= ""
+			nRecno		:= Recno()
+			While !oReport:Cancel() .And. !Eof() .And. SD4->D4_FILIAL+SD4->D4_COD+SD4->D4_TRT == xFilial("SD4")+cCodAnt+cTrtAnt .And. SD4->D4_DATA == dDataD4
+				
+				If cOP <> D4_OP
+					dbSkip()
+					Loop
+				EndIf
+				
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³ Nao passam registros encerrados ou com tipo de OP invalido   ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				SC2->(dbSetOrder(1))
+				SC2->(MsSeek(xFilial("SC2")+SD4->D4_OP))
+				SC2->(dbSetOrder(2))
+				
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³ Consiste a quantidade do empenho de acordo com a ordem (Por  ³
+				//³ Ordem de Producao) e a pergunta 11.                          ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				If !(MtrAvalOP(mv_par07))
+					dbSkip()
+					Loop
+				EndIF
+				
+				If mv_par08 == 1 .And. (SomaPrazo(SD4->D4_DATA, - CalcPrazo(SD4->D4_COD,SD4->D4_QUANT)) >= dDataBase)
+					dbSkip()
+					Loop
+				EndIf
+				
+				aAdd(aCampos,{ "S",SD4->D4_OP,SD4->D4_DATA,SD4->D4_COD,SD4->D4_QUANT,SD4->D4_DATA,"EM",SD4->D4_OP})	//"EM"
+				
+				If cOpAnt == SD4->D4_OP
+					nRecno++
+				EndIf
+				cOpAnt := SD4->D4_OP
+				
+				dbSkip()
+				
+			EndDo
+			
+			dbGoto(nRecno)
+			
+			dbSelectArea(cAliasTRB)
+			For nX := 1 To Len(aCampos)
+				RecLock(cAliasTRB,.T.)
+				Replace	TIPO       With aCampos[nX][01],;
+				DOCUMENTO  With aCampos[nX][02],;
+				DTEVENTO   With aCampos[nX][03],;
+				PRODUTO    With aCampos[nX][04],;
+				QUANTIDADE With aCampos[nX][05],;
+				EMISSAO    With aCampos[nX][06],;
+				TIPODOC    With aCampos[nX][07],;
+				OP         With aCampos[nX][08]
+				MsUnlock()
+			Next nX
+			dbSelectArea("SD4")
+			dbSkip()
+		EndDo
+		dbSelectArea("SD4")
+	EndDo
+	
+	If nOrdem == 2
+		TA350Prod(oReport,oCabec,oFaltas,cAliasTRB)	//-- Por Produto
+	ElseIf nOrdem == 1
+		TA350Op(oReport,oCabec,oFaltas,cAliasTRB)	//-- Por Ordem de Producao
+	EndIf
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Deleta arquivo de Trabalho                                   ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	dbSelectArea(cAliasTRB)
+	dbCloseArea()
+	Ferase(cAliasTRB+GetDBExtension())
+	Ferase(cAliasTRB+OrdBagExt())
+	
+	If File(cIndSC7+OrdBagExt())
+		Ferase(cIndSC7+OrdBagExt())
+	EndIf
+	
+	Return Nil
+
+Static Function TA350Prod(oReport,oCabec,oFaltas,cAliasTRB)
+	Local lPassou  := .T.
+	Local lImprime := .T.
+	Local cCodAnt  := ""
+	Local nSaldoIni:= ""
+	Local nSaldo   := 0
+	Local nQemp    := 0
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Carrega codeblock dos campos utilizados no relatorios        ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	oCabec:Cell('SALDO'):SetBlock({|| nSaldoIni})
+	oFaltas:Cell('SALDO'):SetBlock({|| nSaldo})
+	oFaltas:Cell('DTCOMPRA'):SetBlock({|| SomaPrazo(DTEVENTO, - CalcPrazo(PRODUTO, nSaldo))})
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Posicionamento de tabelas auxiliares                         ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	TRPosition():New(oFaltas,"SC2",1,{|| xFilial("SC2")+(cAliasTRB)->DOCUMENTO})
+	TRPosition():New(oFaltas,"SB1",1,{|| xFilial("SB1")+SC2->C2_PRODUTO})
+	
+	dbSelectArea(cAliasTRB)
+	dbGoTop()
+	oReport:SetMeter(LastRec())
+	
+	oFaltas:Init(.F.)
+	
+	While !oReport:Cancel() .And. !Eof()
+		
+		oReport:IncMeter()
+		cCodAnt := PRODUTO
+		
+		dbSelectArea("SB1")
+		dbSetOrder(1)
+		MsSeek(xFilial("SB1")+cCodAnt)
+		
+		dbSelectArea("SB2")
+		dbSetOrder(1)
+		MsSeek(xFilial("SB2")+cCodAnt)
+		nSaldo := 0
+		nQemp  := 0
+		While !Eof() .And. B2_FILIAL+B2_COD == xFilial("SB2")+cCodAnt
+			If SB2->B2_LOCAL >= mv_par05 .And. SB2->B2_LOCAL <= mv_par06
+				//nSaldo += SaldoSB2(.F.,.F.,dDataBase,mv_par13==2,mv_par12==1)
+				//nQemp  += If(mv_par07==1,B2_QEMP,If(mv_par07==2,B2_QEMPPRE,B2_QEMP+B2_QEMPPRE))
+				nSaldo += SB2->(B2_QATU-B2_QEMP) //-B2_QEMPPRE)
+				nQemp  += SB2->B2_QEMP
+			EndIf
+			dbSkip()
+		EndDo
+		
+		nSaldoIni := nSaldo
+		
+		dbSelectArea(cAliasTRB)
+		lImprime := .T.
+		lPassou  := .F.
+		While !Eof() .And. PRODUTO == cCodAnt
+			
+			If TIPO == "E"
+				nSaldo += QUANTIDADE
+			Else
+				nSaldo -= QUANTIDADE
+			EndIf
+			
+			If (mv_par04 == 1 .And. nSaldoIni < nQemp) .Or. mv_par04 == 2 .And. nSaldo < 0
+				
+				If lImprime
+					oReport:SkipLine()
+					oCabec:Init()
+					oCabec:PrintLine()
+					oCabec:Finish()
+					lImprime := .F.
+				EndIf
+				
+				If !Empty(SubStr(DOCUMENTO,7,5)) .And. TIPODOC != "OP"
+					oFaltas:Cell("B1_COD"	):Show()	//"Produto"
+					oFaltas:Cell("B1_DESC"	):Show()	//"Descricao"
+					oFaltas:Cell("B1_TIPO"	):Show()	//"Tipo"
+					oFaltas:Cell("B1_GRUPO"	):Show()	//"Grupo"
+				Else
+					oFaltas:Cell("B1_COD"	):Hide()
+					oFaltas:Cell("B1_DESC"	):Hide()
+					oFaltas:Cell("B1_TIPO"	):Hide()
+					oFaltas:Cell("B1_GRUPO"	):Hide()
+				EndIf
+				
+				oFaltas:PrintLine()
+				lPassou := .T.
+			EndIf
+			dbSkip()
+		EndDo
+		
+		If lPassou
+			oReport:ThinLine() //-- Impressao de Linha Simples
+		EndIf
+		
+	EndDo
+	oFaltas:Finish()
+	
+	Return
+
+Static Function TA350Op(oReport,oCabec,oFaltas,cAliasTRB)
+	Local aAreaAnt := {}
+	Local aSaldo   := {}
+	Local aSalIni  := {}
+	Local cNumOP   := ""
+	Local lPassou  := .T.
+	Local lImprime := .T.
+	Local lSoma    := .T.
+	Local nSaldoIni:= 0
+	Local nSldIni  := 0
+	Local nSaldo   := 0
+	Local nPos     := 0
+	Local nReg     := 0
+	Local lProd    := .T.
+	Local lContinua:= .F.
+	Local aCabOP   := {}
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Posicionamento de tabelas auxiliares                         ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	TRPosition():New(oFaltas,"SC2",1,{|| xFilial("SC2")+(cAliasTRB)->DOCUMENTO})
+	TRPosition():New(oFaltas,"SB1",1,{|| xFilial("SB1")+(cAliasTRB)->PRODUTO})
+	TRPosition():New(oCabec ,"SB1",1,{|| xFilial("SB1")+aCabOP[1][2]})
+	
+	dbSelectArea("SD4")
+	dbSetOrder(1)
+	
+	dbSelectArea(cAliasTRB)
+	dbGoTop()
+	oReport:SetMeter(LastRec())
+	
+	oFaltas:Init(.F.)
+	
+	While !oReport:Cancel() .And. !Eof()
+		
+		oReport:IncMeter()
+		cNumOP   := OP
+		nReg     := Recno()
+		lImprime := .T.
+		lPassou  := .F.
+		lSoma    := .T.
+		nSaldo   := 0
+		lProd    := .T.
+		
+		While !oReport:Cancel() .And. !Eof() .And. OP == cNumOP
+			
+			If lProd
+				cProduto:= (cAliasTRB)->PRODUTO
+				nReg 	:= (cAliasTRB)->(Recno())
+				If mv_par11 < 3
+					nPos := aScan(aSalIni,{|x| x[1] == (cAliasTRB)->PRODUTO})
+					If nPos == 0
+						cProduto := (cAliasTRB)->PRODUTO
+						SB2->(MsSeek(xFilial("SB2")+cProduto))
+						While !oReport:Cancel() .And. !SB2->(Eof()) .And. SB2->B2_FILIAL+SB2->B2_COD == xFilial("SB2")+cProduto
+							If SB2->B2_LOCAL >= mv_par05 .And. SB2->B2_LOCAL <= mv_par06
+								//nSaldo += SB2->(B2_QATU-B2_QEMP-B2_QEMPPRE) //SaldoSB2(.F.,.F.,dDataBase,mv_par13==2,mv_par12==1)
+								//nQemp  += If(mv_par07==1,B2_QEMP,If(mv_par07==2,B2_QEMPPRE,B2_QEMP+B2_QEMPPRE))
+								nQemp  += SB2->B2_QEMP
+								nSaldo += SB2->(B2_QATU-B2_QEMP)  //SaldoSB2(.F.,.F.,dDataBase,mv_par13==2,mv_par12==1)
+							EndIf
+							SB2->(dbSkip())
+						EndDo
+					Else
+						nSaldo := aSalIni[nPos,2]
+					EndIf
+					While !oReport:Cancel() .And. !Eof() .And. cProduto == (cAliasTRB)->PRODUTO
+						If TIPO == "E"
+							nSaldo += QUANTIDADE
+						Else
+							nSaldo -= QUANTIDADE
+						EndIf
+						nPos := aScan(aSalIni,{|x| x[1] == (cAliasTRB)->PRODUTO})
+						If nPos == 0
+							aAdd(aSalIni,{(cAliasTRB)->PRODUTO,nSaldo})
+						Else
+							aSalIni[nPos,2]:=nSaldo
+						Endif
+						dbSkip()
+					EndDo
+					If (mv_par11 == 1 .And. nSaldo >= 0) .Or. (mv_par11 == 2 .And. nSaldo < 0)
+						dbGoTo(nReg)
+						lProd  := .F.
+						lSoma  := .T.
+						nSaldo := 0
+					Else
+						Loop
+					EndIf
+				EndIf
+			EndIf
+			
+			If QUANTIDADE == 0
+				dbSkip()
+				Loop
+			EndIf
+			
+			If !lSoma
+				nSaldo := 0
+			EndIf
+			
+			If lImprime
+				If !Empty(SubStr(OP,7,5)) .And. TIPODOC != "OP"
+					dbSelectArea("SC2")
+					dbSetOrder(1)
+					MsSeek(xFilial("SC2")+cNUMOP)
+					dbSelectArea("SB1")
+					dbSetOrder(1)
+					MsSeek(xFilial("SB1")+SC2->C2_PRODUTO)
+					dbSelectArea(cAliasTRB)
+				EndIf
+				
+				nPos := aScan(aSaldo,{|x| x[1] == SB1->B1_COD})
+				
+				If nPos == 0
+					aAreaAnt := SB2->(GetArea())
+					SB2->(MsSeek(xFilial("SB2")+SB1->B1_COD))
+					While !oReport:Cancel() .And. !SB2->(Eof()) .And. SB2->B2_FILIAL+SB2->B2_COD == xFilial("SB2")+SB1->B1_COD
+						If SB2->B2_LOCAL >= mv_par05 .And. SB2->B2_LOCAL <= mv_par06
+							nSaldoIni += SB2->(B2_QATU-B2_QEMP) //-B2_QEMPPRE)  //SaldoSB2(.F.,.F.,dDataBase,mv_par13==2,mv_par12==1)
+						EndIf
+						SB2->(dbSkip())
+					EndDo
+					RestArea(aAreaAnt)
+					dbSelectArea(cAliasTRB)
+					aAdd(aSaldo,{SB1->B1_COD,nSaldoIni})
+					nPos := Len(aSaldo)
+				Else
+					aSaldo[nPos,2] += nSaldoIni
+					nSaldo := nSaldoIni
+				EndIf
+				aCabOP := {}
+				aAdd(aCabOP,{"OP : "+cNUMOP,SB1->B1_COD,"Descricao "+SB1->B1_DESC,"Tipo "+SB1->B1_TIPO,"Grupo "+SB1->B1_GRUPO,"Sld.Disponivel",aSaldo[nPos,2]})
+			EndIf
+			
+			SB1->(MsSeek(xFilial("SB1")+(cAliasTRB)->PRODUTO))
+			nPos := aScan(aSalIni,{|x| x[1] == (cAliasTRB)->PRODUTO})
+			
+			If nPos == 0
+				dbSelectArea("SB2")
+				dbSetOrder(1)
+				MsSeek(xFilial("SB2")+(cAliasTRB)->PRODUTO)
+				nSldIni := 0
+				While !oReport:Cancel() .And. !Eof() .And. B2_FILIAL+B2_COD == xFilial("SB2")+(cAliasTRB)->PRODUTO
+					If SB2->B2_LOCAL >= mv_par05 .And. SB2->B2_LOCAL <= mv_par06
+						nSldIni += SB2->(B2_QATU-B2_QEMP-B2_QEMPPRE) //SaldoSB2(.F.,.F.,dDataBase,mv_par13==2,mv_par12==1)
+					EndIf
+					dbSkip()
+				EndDo
+				dbSelectArea(cAliasTRB)
+				aAdd(aSalIni,{(cAliasTRB)->PRODUTO,nSldIni})
+				nPos		:= Len(aSalIni)
+				nSaldo		+= nSldIni
+				lContinua	:= .T.
+			Else
+				nSaldo		:= aSalIni[nPos,2]
+				lContinua	:= .F.
+			EndIf
+			
+			If mv_par11 == 3
+				If TIPO == "E"
+					nSaldo += QUANTIDADE
+				Else
+					nSaldo -= QUANTIDADE
+				EndIf
+			EndIf
+			
+			//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+			//³ Impressao do cabecalho da O.P.                        ³
+			//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+			If lImprime .And. ((mv_par04 == 1 .And. nSaldo < 0) .Or. mv_par04 == 2)
+				oCabec:Init()
+				oReport:PrintText(aCabOP[1][1])	//"OP : "
+				oCabec:Cell("B1_COD"	):Show() 	//"Produto : "
+				oCabec:Cell("B1_DESC"	):Show()	//"Descricao : "
+				oCabec:Cell("B1_TIPO"	):Show()	//"Tipo : "
+				oCabec:Cell("B1_GRUPO"	):Show()	//"Grupo : "
+				oCabec:Cell('SALDO'	 	):SetValue(aCabOP[1][7]) //"Saldo : "
+				oCabec:PrintLine()
+				oCabec:Finish()
+				lImprime := .F.
+			EndIf
+			
+			//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+			//³ Impressao do Saldo Atual do Produto                   ³
+			//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+			If lContinua .And. ((mv_par04 == 1 .And. nSaldo < 0) .Or. mv_par04 == 2)
+				oFaltas:Cell("TIPO"			):SetValue("E")		//"Tipo"
+				oFaltas:Cell("TIPODOC"		):SetValue("")		//"Tipo do Documento"
+				oFaltas:Cell("DOCUMENTO"	):SetValue("Sld.Disponivel")	//"Saldo Atual"
+				oFaltas:Cell("EMISSAO" 		):SetValue("")		//"Emissao"
+				oFaltas:Cell("DTEVENTO"		):SetValue("")		//"Data do Evento"
+				oFaltas:Cell("B1_DESC"		):Hide()           //"Descricao"
+				oFaltas:Cell("B1_TIPO"		):Hide()           //"Tipo"
+				oFaltas:Cell("B1_GRUPO"		):Hide()           //"Grupo"
+				oFaltas:Cell('QUANTIDADE'	):SetValue(0)      //"Quantidade"
+				oFaltas:Cell('SALDO'	 	):SetValue(nSldIni)//"Saldo"
+				oFaltas:Cell('DTCOMPRA'	 	):SetValue("")     //"Data da Compra"
+				oFaltas:PrintLine()
+				lContinua := .F.
+			EndIf
+			
+			If (mv_par04 == 1 .And. nSaldo < 0) .Or. mv_par04 == 2
+				oFaltas:Cell("TIPO"			):SetValue(TIPO)		//"Tipo"
+				oFaltas:Cell("TIPODOC"		):SetValue(TIPODOC)		//"Tipo do Documento"
+				oFaltas:Cell("DOCUMENTO"	):SetValue(DOCUMENTO)	//"Documento"
+				oFaltas:Cell("EMISSAO" 		):SetValue(EMISSAO)		//"Emissao"
+				oFaltas:Cell("DTEVENTO"		):SetValue(DTEVENTO)	//"Data do Evento"
+				oFaltas:Cell("B1_COD"		):Show()				//"Produto"
+				oFaltas:Cell("B1_DESC"		):Show()				//"Desricao"
+				oFaltas:Cell("B1_TIPO"		):Show()				//"Tipo"
+				oFaltas:Cell("B1_GRUPO"		):Show()				//"Grupo"
+				oFaltas:Cell('QUANTIDADE'	):SetValue(QUANTIDADE)	//"Quantidade"
+				oFaltas:Cell('SALDO'		):SetValue(nSaldo)		//"Saldo"
+				oFaltas:Cell('DTCOMPRA'	 	):SetValue(SomaPrazo(DTEVENTO, - CalcPrazo(PRODUTO, nSaldo)))
+				oFaltas:PrintLine()
+				lPassou := .T.
+			EndIf
+			
+			dbSkip()
+			
+			lSoma := If((cAliasTRB)->PRODUTO==SB1->B1_COD,.T.,.F.)
+			aSalIni[nPos,2] := nSaldo
+			lProd := !lSoma
+			
+		EndDo
+		
+		If lPassou
+			oReport:ThinLine() //-- Impressao de Linha Simples
+			oReport:SkipLine() //-- Salta Linha
+		EndIf
+		
+	EndDo
+	
+	oFaltas:Finish()
+	
+	Return
+
+Static Function AjustaSX1()
+	Local aArea	:= GetArea()
+	
+	PutSX1("MTR350","09","Da OP ? "       ,"+De OP ?"        ,"From Production Order ?"  ,"mv_ch9","C",13,0,0,"G","","SC2","","","mv_par09","","","","","","","","","","","","","","","","",{"No. OP inicial a ser considerado na","filtragem do cadastro de OPs (SC2)."},{"Inicial PO number to consider when","filtering th POs file (SC2)."},{"Numero de OP inicial a ser considerada","en el filtro del archivo de OP (SC2)."})
+	PutSX1("MTR350","10","Ate a OP ?"     ,"+A  OP ?"        ,"To Production Order ?"    ,"mv_cha","C",13,0,0,"G","","SC2","","","mv_par10","","","","","","","","","","","","","","","","",{"No. OP  final  a ser considerado na","filtragem do cadastro de OPs (SC2)."},{" Final  PO number to consider when","filtering th POs file (SC2)."},{"Numero de OP  final  a ser considerada","en el filtro del archivo de OP (SC2)."})
+	
+	PutSX1("MTR350","11","Listar as OPs ?","+Listar as OPs ?","List The Poduction Order?","mv_chb","N",01,0,0,"C","",""   ,"","","mv_par11","Atendidas","Atendidas","Processed","","Nao Atendidas","No Atendida","No Processed","Ambas","Ambas","Both","","","","","","",;
+	{"Sera considerados as Ordens de Producao"  ,"com os empenhos: Atendidos, Nao Atendidos","ou Ambos. Pergunta considerada apenas"   ,"para a opcao de Ordem Por OPs"   },;
+	{"It will take in consideration Production" ,"Orders with allocations: Processed, Not"  ,"Processed or Both. This question is used","only for the option Order by POs"},;
+	{"Se consideraran las Ordenes de Produccion","con las reservas: Atendidas, No Atendidas","o Ambas. Pregunta considerada solamente","para la opcion de Orden por OP."  })
+	
+	PutSX1("MTR350","12","Cons.Qtd.N/Em Poder 3o. ?","Cons.Ctd N/en Poder 3o ?","Our Qty.in 3rd P.Pos ?","mv_chc","N",1,0,2,"C","","","","","mv_par12","Soma","Suma","Add","","Ignora","Ignora","Ignore","","","","","","","","","",;
+	{"Indica se a qtd nossa em poder de  ","terceiros sera considerada na avali","acao do estoque disponivel.        ","                                   "},;
+	{"It indicates if the amount ours in ","being able of third will be conside","red in the evaluation of the availa","ble supply.                        "},;
+	{"Indica si la cantidad el nuestros e","n poder de tercera es considerada ","en la evaluación de la fuente dispo","nible.                              "})
+	
+	PutSX1("MTR350","13","Cons.Qtd.3o.Em N/Poder ?","Cons. Ctd 3o en N/Poder  ?","3rd Qty.in our Poss ?","mv_chd","N",1,0,2,"C","","","","","mv_par13","Subtrai","Resta","Subtract","","Ignora","Ignora","Ignore","","","","","","","","","",;
+	{"Indica se a qtd de terceiro em Nosso","poder sera considerada na avaliacao","do estoque disponivel.            ","                                   "},;
+	{"It indicates if the amount of third","in our power, will be considered in","the evaluation of the available sup","ply.                               "},;
+	{"Indica si la cantidad de tercera en","nuestra energía, es considerada en ","la evaluación de la fuente disponib","le.                                "})
+	
+	PutSX1("MTR350","14","Utiliza Data  ?","Utiliza la Fecha","It uses Date            ?","mv_che","N",01,0,0,"C","",""   ,"","","mv_par14","Data de Empenho","Fecha Reservas","Date of Allocat","","Data Referencia","Fech.Referencia","Date Reference ","","","","","","","","","",;
+	{"Serao considerados Pedidos de compras,So","licitacoes e OPs pendentes ate a data do ","empenho ou ate a data de Referencia info","rmada.                          "},; // Port.
+	{"It will take in consideration Purchase O","rder, Solicitation and Production Orders p","endants until the date of allocate or un","til the date of reference.      "},; // Ingles
+	{"Se consideran los Pedidos de compras,sol","icituds e las Ordenes de Produccion colga","ntes hasta la fecha de las reservas o ha","sta la fecha de la referencia.  "})  // Espanhol
+	
+	PutSX1("MTR350","15","Data de Referencia ?","Fecha de la Referencia ?","Date of Reference ?","mv_chf","D",08,0,0,"G","",""   ,"","","mv_par15","","","","","","","","","","","","","","","","",;
+	{"Se a data de referencia nao for informad","a, o parametro Utiliza data passara a co","nsiderar a data do empenho.             ","                                        "},; // Port.
+	{"If the date of referencia will not be in","formed, the parameter It uses Date, will"," start to consider date of allocate.    ","                                        "},; // Ingles
+	{"Si la fecha de la referencia no es infor","mada, del parámetro Utiliza la Fecha come","nzará a considerar la fecha de la reser","va.                                     "})  // Espanhol
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Ajuste do Grupo de Perguntas para o Protheus Start    ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	dbSelectArea("SX1")
+	dbSetOrder(1)
+	dbSeek("MTR350")
+	While !Eof() .And. Alltrim(SX1->X1_GRUPO) == "MTR350"
+		If Alltrim(SX1->X1_PYME) <> "S"
+			RecLock("SX1",.F.)
+			SX1->X1_PYME := "S"
+			MsUnlock()
+		Endif
+		dbSkip()
+	Enddo
+	RestArea( aArea )
+	Return
