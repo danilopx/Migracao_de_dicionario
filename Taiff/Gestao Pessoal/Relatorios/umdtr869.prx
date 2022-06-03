@@ -1,0 +1,1157 @@
+#Include "Protheus.ch"
+#Include "UMDTR869.ch"
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ MDTR869  ³ Autor ³ Andre E. Perez Alvarez³ Data ³ 30.05.06 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³       Relatorio da Taxa Mensal de Acidentes.               ³±±
+±±³          ³ - Esse relatorio imprime uma tabela que segue os padroes do³±±
+±±³          ³ Quadro I da NR-30. O usuario escolhe o ano e um centro de  ³±±
+±±³          ³ custo.                                                     ³±± 
+±±³          ³ - Sao verficados todos os funcionarios pertencentes ao     ³±± 
+±±³          ³ centro de custo informado durante o ano informado. Sao     ³±± 
+±±³          ³verificados todos os acidentes desses funcionarios durante  ³±± 
+±±³          ³o ano informado.                                            ³±±
+±±³          ³- Com base no resumo destas informacoes, e' preenchido o    ³±±
+±±³          ³quadro estatisco.                                           ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe e ³ MDTR869(void)                                              ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Generico                                                   ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß/*/
+User Function MDTR869()
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Define Variaveis                                             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Local nSizeSI3 := If((TAMSX3("I3_CUSTO")[1]) < 1,9,(TAMSX3("I3_CUSTO")[1]))
+
+SETKEY(VK_F9, {|| NGVersao("MDTR869", 3 )})
+
+Private cAlias  := "SI3"
+Private cCodFil := "SI3->I3_FILIAL"
+Private cCodCC  := "I3_CUSTO"
+Private cDescCC := "SI3->I3_DESC"
+
+If Alltrim(GETMV("MV_MCONTAB")) == "CTB"
+	cAlias  := "CTT"
+	cCodFil := "CTT->CTT_FILIAL"
+	cCodCC  := "CTT_CUSTO"
+	cDescCC := "CTT->CTT_DESC01"
+Endif
+
+Private cPerg :="MDT869    "
+
+DbSelectArea("SX1")
+DbSetOrder(01)
+/*If DbSeek(cPerg+"02")
+	If Alltrim(SX1->X1_F3) <> cAlias .or. SX1->X1_TAMANHO <> nSizeSI3 .or. "NaoVazio() .and. Existcpo(cAlias,mv_par02)" <> AllTrim(SX1->X1_VALID)
+		Reclock('SX1',.F.)
+		SX1->X1_TAMANHO := nSizeSI3
+		SX1->X1_F3      := cAlias
+		SX1->X1_VALID   := "NaoVazio() .and. Existcpo(cAlias,mv_par02)"
+		SX1->(MsUnLock())
+	Endif	
+Endif*/   
+If DbSeek(cPerg+"02") .AND. AllTrim(SX1->X1_PERGUNT)	<> STR0040 //"Imprimir Conforme NR-30?"
+	Reclock("SX1",.F.)                                                                                     
+	dbDelete()
+	MsUnlock("SX1")
+EndIf
+If !dbSeek(cPerg+"02")
+	Reclock("SX1",.T.)
+	SX1->X1_GRUPO   := cPerg
+	SX1->X1_ORDEM   := "02"
+	SX1->X1_PERGUNT := STR0040//"Imprimir Conforme NR-30?"
+	SX1->X1_PERSPA  := STR0040
+	SX1->X1_PERENG  := STR0040
+	SX1->X1_VARIAVL := "mv_ch2"
+	SX1->X1_TIPO    := "C"
+	SX1->X1_TAMANHO := 1
+	SX1->X1_GSC     := "C"
+	SX1->X1_VAR01   := "mv_par02"
+	SX1->X1_DEF01	:= STR0041
+	SX1->X1_DEFSPA1	:= STR0041
+	SX1->X1_DEFENG1	:= STR0041
+	SX1->X1_DEF02	:= STR0042
+	SX1->X1_DEFSPA2	:= STR0042
+	SX1->X1_DEFENG1	:= STR0042
+	SX1->X1_HELP	:= "MDT869   02"
+	MsUnlock("SX1")
+	NgHelp("MDT869   02",STR0043)//"Define se o relatório será impresso conforme a NR-30."
+Endif
+If DbSeek(cPerg+"04") .AND. AllTrim(SX1->X1_PERGUNT)	<> STR0048 //"De Centro Custo ?"
+	Reclock("SX1",.F.)                                                                                     
+	dbDelete()
+	MsUnlock("SX1")
+EndIf
+If !DbSeek(cPerg+"04") .OR. DbSeek(cPerg+"04") .AND. AllTrim(SX1->X1_PERGUNT) <> STR0048
+   Reclock("SX1",.T.)
+   SX1->X1_GRUPO   := cPerg
+   SX1->X1_ORDEM   := "04"
+   SX1->X1_VARIAVL := "mv_ch4"
+   SX1->X1_PERGUNT := STR0048 //"De Centro Custo ?"
+   SX1->X1_PERSPA  := STR0048
+   SX1->X1_PERENG  := STR0048
+   SX1->X1_TIPO    := "C"
+   SX1->X1_GSC     := "G"
+   SX1->X1_VAR01   := "mv_par04"
+   SX1->X1_VALID   := 'If(empty(mv_par04),.t.,ExistCpo("SI3",mv_par04))'//"NaoVazio()"
+   SX1->X1_F3	    := "CTT"  
+   SX1->X1_TAMANHO := nSizeSI3
+   SX1->X1_HELP    := "MNC81503"
+   SX1->(MsUnLock())
+Endif
+If !DbSeek(cPerg+"05")
+   Reclock("SX1",.T.)
+   SX1->X1_GRUPO   := cPerg
+   SX1->X1_ORDEM   := "05"
+   SX1->X1_VARIAVL := "mv_ch5"
+   SX1->X1_PERGUNT := STR0049 //"Ate Centro Custo ?" 
+   SX1->X1_PERSPA  := STR0049
+   SX1->X1_PERENG  := STR0049
+   SX1->X1_TIPO    := "C"
+   SX1->X1_GSC     := "G"
+   SX1->X1_VAR01   := "mv_par05"
+   SX1->X1_VALID   := 'If(atecodigo("SI3",mv_par04,mv_par05,9),.t.,.f.)'//"NaoVazio()"
+   SX1->X1_F3	    := "CTT"   
+   SX1->X1_TAMANHO := nSizeSI3  
+   SX1->X1_HELP    := "MNC81503"
+   SX1->(MsUnLock())
+Endif 
+
+nLenFil := Len(TMW->TMW_FILIAL)
+If !dbSeek(cPerg+"06")
+	RecLock("SX1",.T.)
+	SX1->X1_GRUPO   := cPerg
+	SX1->X1_ORDEM   := "06"
+	SX1->X1_PERGUNT := STR0050 //"De Filial ?"
+	SX1->X1_PERSPA  := STR0050
+	SX1->X1_PERENG  := STR0050
+	SX1->X1_TAMANHO := nLenFil
+	SX1->X1_GSC     := "G"
+	SX1->X1_VALID   := "MDT869FLVL(1)"
+	SX1->X1_VAR01   := "mv_par06"
+	SX1->X1_VARIAVL := "mv_ch6"             
+	SX1->X1_TIPO    := "C"
+   SX1->X1_F3      := "XM0"
+	SX1->X1_HELP    := ".MDTFILDE."
+	SX1->(MsUnLock())
+ENDIF
+If !dbSeek(cPerg+"07")                           			
+	RecLock("SX1",.T.)
+	SX1->X1_GRUPO   := cPerg
+	SX1->X1_ORDEM   := "07"
+	SX1->X1_PERGUNT := STR0051 //"Ate Filial ?"
+	SX1->X1_PERSPA  := STR0051
+	SX1->X1_PERENG  := STR0051
+	SX1->X1_TAMANHO := nLenFil
+	SX1->X1_GSC     := "G"
+	SX1->X1_VALID   := "MDT869FLVL(2)"
+	SX1->X1_VAR01   := "mv_par07"
+	SX1->X1_VARIAVL := "mv_ch7"
+	SX1->X1_TIPO    := "C"
+  	SX1->X1_F3      := "XM0"
+	SX1->X1_HELP    := ".MDTFILAT."
+	SX1->(MsUnLock())
+ENDIF
+If !Dbseek(cPerg+"08")// .AND. AllTrim(SX1->X1_PERGUNT) == STR0052 //"Listar acidentes ?"
+	RecLock("SX1",.T.)
+	SX1->X1_GRUPO   := cPerg
+	SX1->X1_ORDEM   := "08"
+	SX1->X1_VARIAVL := "mv_ch8"  
+	SX1->X1_PERGUNT := STR0052 //"Listar acidentes ?"
+	SX1->X1_PERSPA  := STR0052
+	SX1->X1_PERENG  := STR0052
+	SX1->X1_VAR01   := "mv_par08"
+	SX1->X1_VALID   := "NaoVazio()"//"PERTENCE('12345')"
+	SX1->X1_TIPO    := "N"
+	SX1->X1_GSC     := "C" 
+	SX1->X1_DEF01   := STR0053 //"Tipico"
+	SX1->X1_DEFSPA1 := STR0053
+	SX1->X1_DEFENG1 := STR0053
+	SX1->X1_DEF02   := STR0054 //"Trajeto"
+	SX1->X1_DEFSPA2 := STR0054
+	SX1->X1_DEFENG2 := STR0054
+	SX1->X1_DEF03   := STR0055 //"Trabalho"
+	SX1->X1_DEFSPA3 := STR0055
+	SX1->X1_DEFENG3 := STR0055
+	SX1->X1_DEF04   := STR0056 //"Incidente"
+	SX1->X1_DEFSPA4 := STR0056
+	SX1->X1_DEFENG4 := STR0056
+	SX1->X1_DEF05   := STR0057 //"Todas"
+	SX1->X1_DEFSPA5 := STR0057
+	SX1->X1_DEFENG5 := STR0057
+	SX1->X1_TAMANHO := 1
+	SX1->X1_HELP	 := "MDT869   03"
+	MsUnLock("SX1")
+   NgHelp("MDT869   03",STR0058)  //"Define qual tipo de Acidente será impresso no relatório."
+Endif
+If !dbSeek(cPerg+"09")
+   Reclock('SX1',.T.)
+   SX1->X1_GRUPO   := cPerg
+   SX1->X1_ORDEM   := "09"
+   SX1->X1_PERGUNT := STR0059 //"Filtro Avançado Centro Custo ?"
+   SX1->X1_PERSPA  := STR0059
+	SX1->X1_PERENG  := STR0059
+   SX1->X1_VARIAVL := "mv_ch9"
+   SX1->X1_TAMANHO := 1
+   SX1->X1_GSC     := "C"
+   SX1->X1_VALID   := "NAOVAZIO()"
+   SX1->X1_VAR01   := "mv_par09"
+   SX1->X1_TIPO    := "C"
+   SX1->X1_DEF01   := STR0041 //"Sim"
+   SX1->X1_DEF02   := STR0042 //"Não"      
+   SX1->X1_PRESEL  := 2 
+   SX1->X1_HELP	 := "MDT869   04"
+   MsUnLock("SX1")
+   NgHelp("MDT869   04",STR0061)  //"Indica se deseja utilizar filtro avançado para Centro de Custo."
+Endif
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Verifica as perguntas selecionadas                           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+pergunte(cPerg,.F.)
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis utilizadas para parametros                         ³
+//³ mv_par01             // Ano ?                                ³
+//³ mv_par02             // Imprimir Conforme NR-30?             ³
+//³ mv_par03             // Tipo de Impressao ?					 ³ 
+//³ mv_par04  				 // De Centro Custo ?		 		 ³
+//³ mv_par05 		  		 // Ate Centro Custo ?				 ³
+//³ mv_par06			  	 // De Filial ?      				 ³
+//³ mv_par07				 // Ate Filial ?					 ³
+//³ mv_par08     			 // Listar acidentes ?  			 ³
+//³ mv_par09             // Filtro Avançado de Centro de Custo ? |
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+If pergunte(cPerg,.t.)   
+	Processa({|lEnd| U_MDT869IMP()}) 
+Endif
+
+Return NIL
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡„o    ³ MDT869IMP³ Autor ³Andre E. Perez Alvarez ³ Data ³31/05/2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡„o ³ Busca os dados para a impressao do relatorio.              ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß/*/
+User Function MDT869IMP()
+
+Local nX, nY, nZ, nXX
+Local nCont := 1
+Local cData := ""
+Local dtDemissa
+Local dtInic, dtFim
+Local lNot
+Local aAreaSRE := {}
+Local nIndTNC := fRetOrder("TNC","TNC_FILIAL+TNC_NUMFIC+TNC_ACIDEN")
+Local Mv_HrMes := SuperGetMv("MV_NG2HMES",.F.,0)
+Local cEmp := If(FindFunction("FWGrpCompany"),FWGrpCompany(),SM0->M0_CODIGO)
+Local cFil := If(FindFunction("FWCodFil"),FWCodFil(),SM0->M0_CODFIL)
+
+Private aCCusto := {}, aCentroFunc := {}
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Array com as informacoes do Quadro I - NR-30³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Private aQuadro := {}
+/*   Elementos:
+		[x][1] - Mes e Total
+		[x][2] - Horas homem de exposicao ao risco
+		[x][3] - Numero de acidentes ocorridos sem afastamento
+		[x][4] - Numero de acidentes ocorridos com afastamento
+		[x][5] - Taxa de acidentados sem afastamento
+		[x][6] - Taxa de acidentados com afastamento
+		[x][7] - Taxa de Gravidade
+		[x][8] - Dias Perdidos*/
+AADD ( aQuadro, {   STR0007,  0,  0,  0,  0,  0,  0,  0  } ) //"JANEIRO"
+AADD ( aQuadro, {   STR0008,  0,  0,  0,  0,  0,  0,  0  } ) //"FEVEREIRO"
+AADD ( aQuadro, {   STR0009,  0,  0,  0,  0,  0,  0,  0  } ) //"MARÇO"
+AADD ( aQuadro, {   STR0010,  0,  0,  0,  0,  0,  0,  0  } ) //"ABRIL"
+AADD ( aQuadro, {   STR0011,  0,  0,  0,  0,  0,  0,  0  } ) //"MAIO"
+AADD ( aQuadro, {   STR0012,  0,  0,  0,  0,  0,  0,  0  } ) //"JUNHO"
+AADD ( aQuadro, {   STR0013,  0,  0,  0,  0,  0,  0,  0  } ) //"JULHO"
+AADD ( aQuadro, {   STR0014,  0,  0,  0,  0,  0,  0,  0  } ) //"AGOSTO"
+AADD ( aQuadro, {   STR0015,  0,  0,  0,  0,  0,  0,  0  } ) //"SETEMBRO"
+AADD ( aQuadro, {   STR0016,  0,  0,  0,  0,  0,  0,  0  } ) //"OUTUBRO"
+AADD ( aQuadro, {   STR0017,  0,  0,  0,  0,  0,  0,  0  } ) //"NOVEMBRO"
+AADD ( aQuadro, {   STR0018,  0,  0,  0,  0,  0,  0,  0  } ) //"DEZEMBRO"
+AADD ( aQuadro, {   STR0019,  0,  0,  0,  0,  0,  0,  0  } ) //"TOTAL"
+
+If mv_par09 == 1
+	MDT869FILT() //"Filtro Avançado de C. de Custo"
+Endif
+
+cAnoTmp := SubSTR( Alltrim(STR(mv_par01)), 3, 2 )
+Private  aDtMes := {}
+
+AADD ( aDtMes, { CtoD("01/01/"+cAnoTmp) , CtoD("31/01/"+cAnoTmp) } )
+If Mod( mv_par01, 4 ) == 0 .AND. Mod( mv_par01, 100 ) <> 0
+	AADD ( aDtMes, { CtoD("01/02/"+cAnoTmp) , CtoD("29/02/"+cAnoTmp) } )
+Else
+	AADD ( aDtMes, { CtoD("01/02/"+cAnoTmp) , CtoD("28/02/"+cAnoTmp) } )
+Endif
+AADD ( aDtMes, { CtoD("01/03/"+cAnoTmp) , CtoD("31/03/"+cAnoTmp) } )
+AADD ( aDtMes, { CtoD("01/04/"+cAnoTmp) , CtoD("30/04/"+cAnoTmp) } )
+AADD ( aDtMes, { CtoD("01/05/"+cAnoTmp) , CtoD("31/05/"+cAnoTmp) } )
+AADD ( aDtMes, { CtoD("01/06/"+cAnoTmp) , CtoD("30/06/"+cAnoTmp) } )
+AADD ( aDtMes, { CtoD("01/07/"+cAnoTmp) , CtoD("31/07/"+cAnoTmp) } )
+AADD ( aDtMes, { CtoD("01/08/"+cAnoTmp) , CtoD("31/08/"+cAnoTmp) } )
+AADD ( aDtMes, { CtoD("01/09/"+cAnoTmp) , CtoD("30/09/"+cAnoTmp) } )
+AADD ( aDtMes, { CtoD("01/10/"+cAnoTmp) , CtoD("31/10/"+cAnoTmp) } )
+AADD ( aDtMes, { CtoD("01/11/"+cAnoTmp) , CtoD("30/11/"+cAnoTmp) } )
+AADD ( aDtMes, { CtoD("01/12/"+cAnoTmp) , CtoD("31/12/"+cAnoTmp) } )
+ 
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Array que contem o periodo inicial e final de cada funcionario ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+/*   Elementos:
+		[x][1] - Matricula
+		[x][2] - Data inicial
+		[x][3] - Data final
+		[x][4] - controle repeticao
+		[x][5..y] - data_acidente
+		[x][5..y][1] - houve afastamento ou nao. 1=sim, 2=nao							*/
+Private aFunc := {}     	
+
+Private oPrint	 := TMSPrinter():New(OemToAnsi(STR0001)) //"Taxa Mensal de Acidentes"
+Private oFont08  := TFont():New("Arial",08,08,,.F.,,,,.F.,.F.)
+Private oFont09  := TFont():New("Arial",09,09,,.F.,,,,.F.,.F.)
+Private oFont10  := TFont():New("Arial",10,10,,.F.,,,,.F.,.F.)
+Private oFont10n := TFont():New("Arial",10,10,,.T.,,,,.F.,.F.)
+Private oFont11n := TFont():New("Arial",10,10,,.T.,,,,.F.,.F.)
+Private oFont12	 := TFont():New("Arial",12,12,,.F.,,,,.F.,.F.)
+Private oFont12n := TFont():New("Arial",12,12,,.T.,,,,.F.,.F.)
+Private oFont14n := TFont():New("Arial",13,13,,.T.,,,,.F.,.F.)
+
+Private cVerbas    := ""
+Private lIntMDTGPE := .f.
+Private lImprime := .F.
+Private cCentroC := ""
+
+If Alltrim(GETMV("MV_MDTGPE")) == "S"
+	lIntMDTGPE := .t.
+	cVerbas := Alltrim(GETMV("MV_MDTVERBA"))
+Endif
+
+oPrint:SetPortrait() 
+oPrint:Setup()
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Verifica os funcionarios que pertenceram ou pertencem ao         ³
+//³ centro de custo selecionado, durante o ano informado.            ³
+//³ Interessam apenas os funcionarios ativos.                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+DbSelectArea("SRE")
+DbSetOrder(01) //RE_EMPD + RE_FILIALD + RE_MA
+DbSeek(cEmp+cFil)
+While !Eof() 							
+
+	lFu := .T.
+
+	If ( alltrim(SRE->RE_EMPP+SRE->RE_FILIALP) == cEmp+cFil ) .AND. ( mv_par04 >= SRE->RE_CCP ) .AND. ( mv_par05 <= SRE->RE_CCP )
+		dDtTemp := SRE->RE_DATA
+		If year(SRE->RE_DATA) < mv_par01
+			cData := "01/01/" + SubSTR( Alltrim(STR(mv_par01)), 3,2 )
+			dtInic := CtoD (cData)
+		ElseIf year(SRE->RE_DATA) == mv_par01
+			dtInic := SRE->RE_DATA
+		Else
+			dbSelectArea("SRE")
+			dbSkip()
+			Loop
+		EndIf
+
+		aAreaSRE := SRE->(GetArea())
+		lNot := .F.
+
+		cChvSRE := SRE->RE_EMPP+SRE->RE_FILIALP+SRE->RE_MATP
+		If dbseek(cChvSRE)
+			While SRE->RE_EMPD+SRE->RE_FILIALD+SRE->RE_MATD == cChvSRE .AND. !Eof()
+				If SRE->RE_CCD >= mv_par04 .AND. SRE->RE_CCD <= mv_par05
+					If SRE->RE_DATA >= dtInic .and. SRE->RE_DATA >= dDtTemp
+						dtFim := SRE->RE_DATA
+						If year(dtFim) > mv_par01
+							cData := "31/12/" + SubSTR( Alltrim(STR(mv_par01)), 3,2 )
+							dtFim := CtoD (cData)
+						EndIf
+						lNot := .T.
+						Exit
+					EndIf
+				Endif
+				DbSelectArea("SRE")
+				Dbskip()
+			End
+		Endif
+
+		RestArea(aAreaSRE)
+
+		If !lNot
+			If mv_par01 == year(dDataBase)
+				dtFim := dDataBase
+			Else
+				cData := "31/12/" + SubSTR( Alltrim(STR(mv_par01)), 3,2 )
+				dtFim := CtoD (cData)
+			EndIf
+		EndIf
+
+    	//Verifica se o funcionario esteve demitido em algum momento, para determinar o periodo em que esteve ativo
+		DbSelectArea("SRA")
+		DbSetOrder(01)
+		DbSeek(xFilial("SRA")+SRE->RE_MATP)
+		IF SRA->RA_CATFUNC $ "A,E,P,G"
+			dbSelectArea("SRE")
+			dbSkip()
+			Loop
+		EndIF
+		If SRA->RA_SITFOLH == "D"
+			dtDemissa := SRA->RA_DEMISSA
+		Endif
+		If !Empty(dtDemissa) .AND. (dtDemissa <= dtFim)
+			If dtDemissa >= dtInic
+				dtFim := dtDemissa - 1
+			Else
+				lFu := .F.
+			EndIf
+		EndIf
+		If lFu
+			If (nX := Ascan(aFunc,{ |x| x[1]+DtoS(x[2]) == SRE->RE_MATP+DtoS(dtInic) } ) ) > 0
+				aFunc[nX][3] := dtFim
+			Else
+				AADD (aFunc, {SRE->RE_MATP,dtInic,dtFim,.T.,SRA->RA_HRSMES,SRA->RA_CC} ) 
+			EndIf
+		EndIf
+	EndIf
+
+	If ( alltrim(SRE->RE_EMPD+SRE->RE_FILIALD) == cEmp+cFil ) .AND.;
+	   ( mv_par04 >= SRE->RE_CCD ) 					.AND.;
+	   ( mv_par05 <= SRE->RE_CCD ) 					.AND.;
+       ( year(SRE->RE_DATA) >= mv_par01 )
+
+		If (nX := Ascan ( aFunc,{ |x| x[1] == SRE->RE_MATD .and. x[2] < SRE->RE_DATA } ) ) > 0
+			dbSelectArea("SRE")
+			dbSkip()
+			Loop
+		EndIf
+
+		DbSelectArea("SRA")
+		DbSetOrder(01)
+		DbSeek(xFilial("SRA")+SRE->RE_MATD)
+		IF SRA->RA_CATFUNC $ "A,E,P,G"
+			dbSelectArea("SRE")
+			dbSkip()
+			Loop
+		EndIF
+		dtAdmiss := SRA->RA_ADMISSA
+		If year(dtAdmiss) > mv_par01
+			dbSelectArea("SRE")
+			dbSkip()
+			Loop
+		Else
+			If year(dtAdmiss) == mv_par01
+				dtInic := dtAdmiss
+			Else
+				cData := "01/01/" + SubSTR( Alltrim(STR(mv_par01)), 3,2 )
+				dtInic := CtoD (cData)
+			EndIf
+			If year(SRE->RE_DATA) == mv_par01
+				dtFim := SRE->RE_DATA - 1
+			Else
+				cData := "31/12/" + SubSTR( Alltrim(STR(mv_par01)), 3,2 )
+				dtFim := CtoD (cData)
+			EndIf
+		EndIf
+
+	   	//Verifica se o funcionario esteve demitido em algum momento, para determinar o periodo em que esteve ativo
+		If SRA->RA_SITFOLH == "D"
+			dtDemissa := SRA->RA_DEMISSA
+		Endif
+		If !Empty(dtDemissa) .AND. (dtDemissa <= dtFim)
+			If dtDemissa >= dtInic
+				dtFim := dtDemissa - 1
+			Else
+				DbSelectArea("SRE")
+				DbSkip()
+				Loop
+			EndIf
+		EndIf
+		If (nX := Ascan(aFunc,{ |x| x[1]+DtoS(x[2]) == SRE->RE_MATD+DtoS(dtInic) } ) ) > 0
+			aFunc[nX][3] := dtFim
+		Else
+			AADD (aFunc, {SRE->RE_MATD,dtInic,dtFim,.F.,SRA->RA_HRSMES,SRA->RA_CC} )
+		EndIf
+	EndIf
+
+	DbSelectArea("SRE")
+	DbSkip()
+End
+
+DbSelectArea("SRA")
+DbSetOrder(02) //RA_FILIAL + RA_CC + RA_MAT
+If Empty(aCCusto)
+	DbSeek(xFilial("SRA")+mv_par04,.T.)	
+Else		
+	DbSeek(xFilial("SRA")+aCCusto[1],.T.)
+EndIf	 
+ 	cWhile := "xFilial('SRA') == SRA->RA_FILIAL"
+  	If !Empty(mv_par06) .AND. !Empty(mv_par07)
+ 		cWhile += " .AND. SRA->RA_FILIAL >= '"+mv_par06+"' .AND. SRA->RA_FILIAL <= '"+mv_par07+"'"
+ 	EndIf
+  	If mv_par09 <> 1                 
+	   cWhile += " .AND. SRA->RA_CC >= '"+mv_par04+"' .AND. SRA->RA_CC <= '"+mv_par05+"'"  
+	EndIf  
+	While !Eof() .AND. &cWhile 
+	IF SRA->RA_CATFUNC $ "A,E,P,G"
+		dbSelectArea("SRA")
+		dbSkip()
+		Loop
+	EndIF
+		If mv_par09 == 1
+  	  		If aScan(aCCusto,{|x| x == SRA->RA_CC})== 0  
+	   		dbSelectArea("SRA")
+				dbSKIP()
+				loop
+			EndIf	                  
+	   EndIf
+		
+	If (nX := Ascan(aFunc,{ |x| x[1] == SRA->RA_MAT } ) ) > 0
+		dbSelectArea("SRA")
+		dbSkip()
+		Loop
+	EndIf
+
+	//Verifica se o periodo de atividade do funcionario engloba o ano informado
+	If ( nAnoInic := year(SRA->RA_ADMISSA) ) > mv_par01
+		dbSelectArea("SRA")
+		dbSkip()
+		Loop
+	EndIf
+	If (SRA->RA_SITFOLH == "D") .AND. (!Empty(SRA->RA_DEMISSA))
+		If ( nAnoFim := year(SRA->RA_DEMISSA) ) < mv_par01
+			dbSelectArea("SRA")
+			dbSkip()
+			Loop
+		EndIf
+	Else
+		nAnoFim := year(dDataBase)
+	EndIf
+
+	If nAnoInic == mv_par01
+		dtInic := SRA->RA_ADMISSA
+	Else
+		cData := "01/01/" + SubSTR( Alltrim(STR(mv_par01)), 3,2 )
+		dtInic := CtoD ( cData )
+	EndIf
+	If nAnoFim == mv_par01
+		If (SRA->RA_SITFOLH == "D") .AND. (!Empty(SRA->RA_DEMISSA))
+			dtFim := SRA->RA_DEMISSA
+		Else
+			dtFim := dDataBase
+		EndIf
+	ElseIf nAnoFim > mv_par01
+		cData := "31/12/" + SubSTR( Alltrim(STR(mv_par01)), 3,2 )
+		dtFim := CtoD ( cData )
+	ElseIf nAnoFim < mv_par01
+		dbSelectArea("SRA")
+		dbSkip()
+		Loop
+	EndIf
+		If mv_par09 <> 1
+			If aScan(aCCusto,{|x| x == SRA->RA_CC})== 0  
+				AADD (aCCusto, SRA->RA_CC)	   
+			EndIf				
+		EndIf	
+		AADD (aFunc, {SRA->RA_MAT,dtInic,dtFim,.F.,SRA->RA_HRSMES, SRA->RA_CC} )
+	
+		DbSelectArea("SRA")
+		DbSkip()
+End
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Fim da verificacao                                                ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+aSort(aFunc,,,{|x,y| x[1]+DtoS(x[2]) < y[1]+DtoS(y[2]) })
+For nX := 1 To Len(aFunc)
+	If Empty(aFunc[nX,1])
+		Loop
+	Endif
+	nTemp := aScan(aFunc,{ |x| x[1] == aFunc[nX,1] } )
+	For nY := nTemp To Len(aFunc)
+		If Empty(aFunc[nY,1])
+			Loop
+		Endif
+		If aFunc[nX,1] <> aFunc[nY,1]
+			Exit
+		Endif
+		If nX == nY
+			Loop
+		Endif
+		If aFunc[nX,2] <= aFunc[nY,3] .and. aFunc[nX,3] >= aFunc[nY,2]
+			aFunc[nX,2] := If( aFunc[nX,2] < aFunc[nY,2] , aFunc[nX,2] , aFunc[nY,2] )
+			aFunc[nX,3] := If( aFunc[nX,3] > aFunc[nY,3] , aFunc[nX,3] , aFunc[nY,3] )
+			aFunc[nY,1] := " "
+		Endif
+	Next nY
+Next nX
+
+aSort(aFunc,,,{|x,y| x[1]+DtoS(x[2]) < y[1]+DtoS(y[2]) })
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Para os funcionarios que pertencem ao centro de custo informado   ³
+//³ durante o ano informado, verifica os seus acidentes de trabalho   ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+For nXX := 1 To Len(aCCusto)
+	For nZ := 1 To Len(aFunc)
+		If aFunc[nZ][6] == aCCusto[nXX]
+			DbSelectArea("TM0")
+			DbSetOrder(03)
+			DbSeek(cFilAnt+aFunc[nZ][1])//Pega as fichas
+				If nIndTNC > 0
+					DbSelectArea("TNC")
+					DbSetOrder(nIndTNC) //TNC_FILIAL+TNC_NUMFIC+TNC_ACIDEN
+					If Dbseek(xFilial("TNC")+TM0->TM0_NUMFIC)//Se encontrar acidente nesta ficha medica
+						While !Eof() .AND. xFilial("TNC")+TM0->TM0_NUMFIC == TNC->TNC_FILIAL+TNC->TNC_NUMFIC
+						
+							If	!Empty(TM0->TM0_CC) .AND. TM0->TM0_CC <> TNC->TNC_CC
+								dbSelectArea("TNC")
+								dbSkip()	
+								Loop
+							EndIf
+							If year(TNC->TNC_DTACID) == mv_par01 .AND. TNC->TNC_INDACI == STR(mv_par08,1)	.OR.;
+								year(TNC->TNC_DTACID) == mv_par01 .AND. mv_par08 == 5  
+								If (aFunc[nZ][2] <= TNC->TNC_DTACID) .AND. (TNC->TNC_DTACID <= aFunc[nZ][3])  //Se a data do acidente esta entre a data inicial e final do funcionario no centro de custo
+									lTemAfast := .f.
+									nDiasAfas := fTemSR8( cFilAnt , aFunc[nZ][1] , TNC->TNC_DTACID )
+									If nDiasAfas > 0
+										lTemAfast := .t.
+									ElseIf TNC->TNC_QTAFAS > 0
+										nDiasAfas := TNC->TNC_QTAFAS                			
+										lTemAfast := .t.
+									EndIf
+									//cCentroC := TNC->TNC_CC
+									If lTemAfast
+										If TNC->TNC_DIASDB > nDiasAfas
+											nDiasAfas := TNC->TNC_DIASDB
+										Endif
+										//Acidente com afastamento
+										AADD ( aFunc[nZ], { Month(TNC->TNC_DTACID), 1, nDiasAfas } )
+									Else
+										//Acidente sem afastamento
+										AADD ( aFunc[nZ], { Month(TNC->TNC_DTACID), 2, 0 } )
+									Endif
+									lImprime := .T.
+								EndIf
+							EndIf
+						  	dbSelectArea("TNC")
+							dbSkip()	
+						End
+					EndIf	
+				Else
+					cFiltroTNC := 'xFilial("TNC")+TM0->TM0_NUMFIC == TNC->TNC_FILIAL+TNC->TNC_NUMFIC'
+					DbSetFilter( {|| &cFiltroTNC}, cFiltroTNC )
+					dbGoTop()
+					While !Eof()
+						If year(TNC->TNC_DTACID) == mv_par01 .AND. TNC->TNC_INDACI == STR(mv_par08,1)	.OR.;
+								year(TNC->TNC_DTACID) == mv_par01 .AND. mv_par08 == 5
+							If (aFunc[nZ][2] <= TNC->TNC_DTACID) .AND. (TNC->TNC_DTACID <= aFunc[nZ][3])  //Se a data do acidente esta entre a data inicial e final do funcionario no centro de custo
+								lTemAfast := .f.
+								nDiasAfas := fTemSR8( cFilAnt , aFunc[nZ][1] , TNC->TNC_DTACID )
+								If nDiasAfas > 0
+									lTemAfast := .t.
+								ElseIf TNC->TNC_QTAFAS > 0
+									nDiasAfas := TNC->TNC_QTAFAS
+									lTemAfast := .t.
+								EndIf
+								If lTemAfast
+									If TNC->TNC_DIASDB > nDiasAfas
+										nDiasAfas := TNC->TNC_DIASDB
+									Endif
+									//Acidente com afastamento
+									AADD ( aFunc[nZ], { Month(TNC->TNC_DTACID), 1, nDiasAfas } )
+								Else
+									//Acidente sem afastamento
+									AADD ( aFunc[nZ], { Month(TNC->TNC_DTACID), 2, 0 } )
+								Endif
+							EndIf
+						EndIf
+					dbSelectArea("TNC")
+					dbSkip()
+					End
+					DbClearFilter() 
+				EndIf 
+		Endif
+	Next nZ
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Fim da verificacao                                                ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Preenche o array que representa o Quadro I ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		lImprime := .T.
+		If lImprime
+			For nX := 1 To Len(aFunc)
+				If aFunc[nX][6] == aCCusto[nXX]
+					nMesInic := Month(aFunc[nX][2])
+					nMesFim  := Month(aFunc[nX][3])
+					nHrsMes  := If(aFunc[nX][5]==0,Mv_HrMes,aFunc[nX][5])
+					
+					For nY := nMesInic to nMesFim
+						dTmpIni := If( aFunc[nX][2] < aDtMes[nY,1] , aDtMes[nY,1] , aFunc[nX][2] )
+						dTmpFim := If( aFunc[nX][3] > aDtMes[nY,2] , aDtMes[nY,2] , aFunc[nX][3] )
+						//Total de horas trabalhadas pelo funcionario
+						aQuadro[nY][2] += ((dTmpFim - dTmpIni) + 1) * (nHrsMes / 30)
+						If lIntMDTGPE
+							//Acrescenta as horas extras e subtrai as faltas (1. Filial+Mat, 2.Verbas, 3.De Data, 4.Ate Data, 5.Horas Mes)
+							aQuadro[nY][2] += MDT865HrsF( cFilAnt+aFunc[nX][1], cVerbas, dTmpIni, dTmpFim, aFunc[nX][5] )
+						Endif
+					Next nY
+				
+					If (nIndex := Len(aFunc[nX])) >= 6		//Se o funcionario possui algum acidente
+						For nY := 7 To nIndex
+							nMesAcid := aFunc[nX][nY][1]
+							If aFunc[nX][nY][2] == 1
+								aQuadro[nMesAcid][4] ++  //4 - Numero de acidentes ocorridos com afastamento
+								aQuadro[nMesAcid][8] += aFunc[nX][nY][3]
+							Else
+								aQuadro[nMesAcid][3] ++  //3 - Numero de acidentes ocorridos sem afastamento
+							EndIf
+						Next nY
+					EndIf
+				Endif
+			Next nX
+				      	
+			For nX := 1 To 12
+				aQuadro[nX][2] := Round( aQuadro[nX][2] , 2 )
+				//2 - Horas homem de exposicao ao risco
+				aQuadro[13][2] += aQuadro[nX][2]
+				//3 - Nº Sem Afastamentos
+				aQuadro[13][3] += aQuadro[nX][3]
+				//4 - Nº Com Afastamentos
+				aQuadro[13][4] += aQuadro[nX][4]
+				//5 - Taxa de acidentados sem afastamento
+				aQuadro[nX][5] := Round( ((aQuadro[nX][3] * 1000000) / aQuadro[nX][2]), 2)
+				//6 - Taxa de acidentados com afastamento
+				aQuadro[nX][6] := Round( ((aQuadro[nX][4] * 1000000) / aQuadro[nX][2]), 2)
+				//8 - Dias Perdidos
+				aQuadro[13][8] += aQuadro[nX][8]
+				//7 - Taxa de Gravidade
+				aQuadro[nX][7] := Round( ((aQuadro[nX][8] * 1000000) / aQuadro[nX][2]), 2)
+			Next nX
+			aQuadro[13][5] := Round( ((aQuadro[13][3] * 1000000) / aQuadro[13][2]), 2)
+			aQuadro[13][6] := Round( ((aQuadro[13][4] * 1000000) / aQuadro[13][2]), 2)
+			aQuadro[13][7] := Round( ((aQuadro[13][8] * 1000000) / aQuadro[13][2]), 2)
+			//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+			//³Fim do preenchimento                                               ³
+			//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³Imprime o quadro³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				dbSelectArea(cAlias)
+			   DbSetOrder(1)
+				DbSeek(xFilial(cAlias)+aCCusto[nXX])
+				U_MODMDT869(&(cDescCC))
+				
+				For nCont := 1 To 13			
+				 	aQuadro[nCont][2] := 0 
+					aQuadro[nCont][3] := 0
+					aQuadro[nCont][4] := 0   
+					aQuadro[nCont][5] := 0
+					aQuadro[nCont][6] := 0
+					aQuadro[nCont][7] := 0
+					aQuadro[nCont][8] := 0
+				Next	
+				lImprime := .F.
+	  	EndIf	
+Next nXX     
+
+If mv_par03 == 1
+	oPrint:Preview()
+Else
+	oPrint:Print()
+Endif 
+
+Return .t.    
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡„o    ³ MODMDT869³ Autor ³Andre E. Perez Alvarez ³ Data ³31/05/2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡„o ³ Impressao do Relatorio                                     ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß/*/
+User Function MODMDT869(cDescCC)
+
+Local nX
+Local lin
+Local cEmpNome
+Local cEmp := If(FindFunction("FWGrpCompany"),FWGrpCompany(),SM0->M0_CODIGO)
+Local cFil := If(FindFunction("FWCodFil"),FWCodFil(),SM0->M0_CODFIL)
+
+DbSelectArea("SM0")
+dbseek(cEmp+cFil)
+cEmpNome := SM0->M0_NOMECOM
+
+oPrint:StartPage() // Iniciar Pagina
+
+//tabela
+nColIni := 100  //coluna inicio
+nColFim := 2000 //coluna fim
+nLinFim := 1560 //linha final da tabela  
+lin     := 100
+nCol    := 1850  //coluna que delimita quadrado do ANO
+nColTit := 900
+If mv_par02 == 2
+	nColFim := 2300
+	nCol    := 2150
+Endif
+
+oPrint:Say(lin,nColTit,Upper(STR0001),oFont14n) //"TAXA MENSAL DE ACIDENTES"
+oPrint:Box(lin:=200,nColIni,nLinFim,nColFim)
+
+//EMPRESA //NAVIO //ANO
+oPrint:Say(lin+20,nColIni+20,STR0020,oFont12n) //"EMPRESA:"
+oPrint:Say(lin+20,nCol+20,STR0021,oFont12n) //"ANO:"
+oPrint:Say(lin+20,nColIni+260,cEmpNome,oFont12)
+oPrint:Line(lin:=280,nColIni,lin,nCol)
+
+If mv_par02 == 1
+	oPrint:Say(lin+20,nColIni+20,STR0022,oFont12n) //"NAVIO:"
+	oPrint:Say(lin+20,nColIni+190,AllTrim(cDescCC),oFont12)
+Else
+	oPrint:Say(lin+20,nColIni+20,STR0045,oFont12n) //"CENTRO DE CUSTO:"
+	oPrint:Say(lin+20,nColIni+340,AllTrim(cDescCC),oFont12)
+Endif
+oPrint:Say(lin+20,nCol+30,AllTrim(STR(mv_par01)),oFont12)	 //ano
+oPrint:Line(lin:=360,nColIni,lin,nColFim)  //delimita quadrado do ANO
+oPrint:Line(200,nCol,360,nCol)	//delimita quadrado do ANO
+
+//(1)HORAS HOMEM DE EXPOSICAO AO RISCO //NUMERO DE ACIDENTES OCORRIDOS //TAXA DE ACIDENTADOS
+oPrint:Say(lin+20,nColIni+70,STR0023,oFont10n) //"HORAS HOMEM DE EXPOSIÇÃO AO RISCO"
+oPrint:Line(lin,850,nLinFim,850)
+oPrint:Say(lin+20,915,STR0024,oFont10n) //"NÚMERO DE ACIDENTES OCORRIDOS"
+oPrint:Line(lin,1550,nLinFim,1550)
+oPrint:Say(lin+20,1600,STR0025,oFont10n) //"TAXA DE ACIDENTADOS"
+If mv_par02 == 2
+	oPrint:Line(lin,2000,nLinFim,2000)
+	oPrint:Say(lin+20,2050,STR0046,oFont10n) //"GRAVIDADE"
+Endif
+oPrint:Line(lin:=440,nColIni,lin,nColFim)	
+
+//MES  //QUANTIDADE  //(2) SEM AFASTAMENTO  //(3) COM AFASTAMENTO  //(4) TFSA   //(5) TFCA
+oPrint:Say(lin+20,nColIni+140,STR0026,oFont10n) //"MÊS"
+oPrint:Line(lin,450,nLinFim,450)
+oPrint:Say(lin+20,540,STR0027,oFont10n) //"QUANTIDADE"
+
+oPrint:Say(lin+20,875,STR0028,oFont10n) //"SEM AFASTAMENTO"
+oPrint:Line(lin,1201,nLinFim,1201)
+oPrint:Say(lin+20,1222,STR0029,oFont10n) //"COM AFASTAMENTO"
+
+oPrint:Say(lin+20,1620,STR0030,oFont10n) //"TFSA"
+oPrint:Line(lin,1775,nLinFim,1775)
+oPrint:Say(lin+20,1840,STR0031,oFont10n) //"TFCA"
+If mv_par02 == 2
+	oPrint:Line(lin,2000,nLinFim,2000)
+	oPrint:Say(lin+20,2120,"TG",oFont10n)
+Endif
+
+//Meses
+For nX := 1 to Len(aQuadro)
+	oPrint:Line(lin+=80,nColIni,lin,nColFim) 
+	oPrint:Say(lin+20,nColIni+50,aQuadro[nX][1],oFont10)  //Mes e "Total"
+	oPrint:Say(lin+20,0820,TransForm(aQuadro[nX][2],"@E 999,999,999.99"),oFont10,,,,1)  //Quantidade (Horas homem de exposicao ao risco)
+	oPrint:Say(lin+20,1170,TransForm(aQuadro[nX][3], "@E 999,999,999"),oFont10,,,,1) //Numero de acidentes ocorridos sem afastamento
+	oPrint:Say(lin+20,1520,TransForm(aQuadro[nX][4], "@E 999,999,999"),oFont10,,,,1) //Numero de acidentes ocorridos com afastamento
+	oPrint:Say(lin+20,1745,TransForm(aQuadro[nX][5],"@E 9,999,999.99"),oFont10,,,,1) //Taxa de acidentados sem afastamento
+	oPrint:Say(lin+20,1970,TransForm(aQuadro[nX][6],"@E 9,999,999.99"),oFont10,,,,1) //Taxa de acidentados com afastamento
+	If mv_par02 == 2
+		oPrint:Say(lin+20,2270,TransForm(aQuadro[nX][7],"@E 9,999,999.99"),oFont10,,,,1) //Taxa de gravidade
+	Endif
+Next nX
+
+lin += 150
+
+If mv_par02 == 1
+	oPrint:Say(lin,nColIni,STR0032,oFont08) //"HORAS HOMEM DE EXPOSIÇÃO AO RISCO - Total de horas à disposição do empregador."
+Else
+	oPrint:Say(lin,nColIni,STR0044,oFont08) //"HORAS HOMEM DE EXPOSIÇÃO AO RISCO - Total de horas à disposição do empregador."
+Endif
+
+oPrint:Say(lin+=40,nColIni,STR0033,oFont08) //"NÚMERO DE ACIDENTES OCORRIDOS SEM AFASTAMENTO - Aquele em que o empregado retorna as suas atividades normais no mesmo"
+oPrint:Say(lin+=40,923,STR0034,oFont08) //"dia do acidente ou no dia seguinte no início da próxima jornada de trabalho."
+
+oPrint:Say(lin+=40,nColIni,STR0035,oFont08) //"NÚMERO DE ACIDENTES OCORRIDOS COM AFASTAMENTO - Aquele em que o empregado não retorna as suas atividades normais no"
+oPrint:Say(lin+=40,923,STR0036,oFont08) //"mesmo dia do acidente ou no dia seguinte no início da próxima jornada de trabalho."
+
+oPrint:Say(lin+=40,nColIni,STR0037,oFont08) //"TFSA - Número de acidentes sem afastamento x 1.000.000 / número de horas homem de exposição."
+
+oPrint:Say(lin+=40,nColIni,STR0038,oFont08) //"TFCA - Número de acidentes com afastamento x 1.000.000 / número de horas homem de exposição."
+If mv_par02 == 2
+	oPrint:Say(lin+=40,nColIni,STR0047,oFont08) //"TG - Tempo Computado x 1.000.000 / número de horas homem de exposição."
+Endif
+
+oPrint:EndPage() 
+	
+Return
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³fRetOrder ³ Autor ³Denis Hyroshi de Souza ³ Data ³ 10/04/05 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³Retorna numero do indice a partir de uma chave              ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function fRetOrder(cAlias,cChave)
+Local nOrdem := 0
+Local aArea := GetArea()
+Local aAreaSIX := SIX->(GetArea())
+
+Dbselectarea("SIX")
+Dbsetorder(1)
+Dbseek(cAlias)
+While !eof() .and. cAlias == SIX->INDICE
+	If Alltrim(SIX->CHAVE) == Alltrim(cChave)
+		If SIX->ORDEM == 'A'
+			nOrdem := 10
+		Elseif SIX->ORDEM == 'B'
+			nOrdem := 11
+		Elseif SIX->ORDEM == 'C'
+			nOrdem := 12
+		Elseif SIX->ORDEM == 'D'
+			nOrdem := 13
+		Elseif SIX->ORDEM == 'E'
+			nOrdem := 14
+		Elseif SIX->ORDEM == 'F'
+			nOrdem := 15
+		Elseif SIX->ORDEM == 'G'
+			nOrdem := 16
+		Else
+			nOrdem := Val(SIX->ORDEM)
+		Endif
+	Endif
+	Dbskip()
+End
+
+RestArea(aArea)
+RestArea(aAreaSIX)
+Return nOrdem
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ NGano869 ³ Autor ³ Andre E. Perez Alvarez³ Data ³ 28.06.06 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Valida o ano informado como parametro na tela de perguntas.³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe e ³ MDTR869(void)                                              ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Generico                                                   ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß/*/
+Static Function NGano869()
+
+If len(AllTrim(str(mv_par01))) != 4
+	MsgStop(STR0039) //"O ano informado deve conter 4 dígitos."
+	Return .F.
+Endif 
+
+Return
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³  fTemSR8 ³ Autor ³Denis Hyroshi de Souza ³ Data ³ 17/09/09 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Verifica se o funcionario tem afastamento por acidente     ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function fTemSR8( _cFilMat , _cMatFun , _dAcidente )
+Local nRet := 0
+Local dTemp
+
+dbSelectArea("SR8")
+dbSetOrder(1)
+dbSeek(_cFilMat+_cMatFun+DtoS(_dAcidente),.t.)
+While !eof() .and. SR8->R8_FILIAL+SR8->R8_MAT == _cFilMat+_cMatFun .and. SR8->R8_DATAINI >= _dAcidente .and. SR8->R8_DATAINI <= _dAcidente+3
+	If Substr(SR8->R8_TIPO,1,1) == "O" //Se for Acidente
+		dTemp := If(Empty(SR8->R8_DATAFIM),dDataBase,SR8->R8_DATAFIM)
+		nRet := (dTemp - SR8->R8_DATAINI) + 1
+		Exit
+	Endif
+	dbSkip()
+End
+
+Return nRet
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³MDT869FILT³ Autor ³ Rodrigo Soledade		  ³ Data ³21/06/2011³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Filtro Avançado de Centro de Custo 							     ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ MDTR869                                                    ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function MDT869FILT()
+
+Local oDlg, nOpca1:= 2
+Private cAliasCTT := GetNextAlias()
+Private lINVERTE := .F.,cMARCA:= getMark()
+
+dbSelectArea("CTT")
+aDBF := {}
+AADD(aDBF,{ "CTT_OK"     , "C" ,02, 0 })
+AADD(aDBF,{"CTT_MARK", "C", 02, 0})
+AADD(aDBF,{ "CTT_CUSTO" , "C" ,09, 0 })
+AADD(aDBF,{ "CTT_DESC01" , "C" ,40, 0 })
+
+aTRB1 := {}  
+AADD(aTRB1,{ "CTT_OK"    ,NIL," ",})
+AADD(aTRB1,{ "CTT_CUSTO",NIL,"C. Custo",})
+AADD(aTRB1,{ "CTT_DESC01",NIL,"Decrição",})
+
+vIND100d  := {"CTT_CUSTO","CTT_MARK+CTT_CUSTO"}  
+aVETINR := {}
+cARQ100d := NGCRIATRB(aDBF,vIND100d,cAliasCTT)
+dbSelectArea("CTT")
+dbSetOrder(1)
+dbGoTop()
+While !Eof() .AND. CTT->CTT_FILIAL == xFILIAL("CTT") 
+	dbSelectArea(cAliasCTT)
+	(cAliasCTT)->(DbAppend())
+	(cAliasCTT)->CTT_OK := Space(2)
+	(cAliasCTT)->CTT_MARK := "ZZ"
+	(cAliasCTT)->CTT_CUSTO := CTT->CTT_CUSTO
+	(cAliasCTT)->CTT_DESC01 := CTT->CTT_DESC01  
+	dbSelectArea("CTT")
+	dbSkip()
+End
+dbSelectArea(cAliasCTT)
+dbGoTop()
+DEFINE MSDIALOG oDlg TITLE OemToAnsi(STR0060) From 120,0 To 484,702 OF oMainWnd PIXEL
+
+oMARK1 := MsSelect():NEW(cAliasCTT,"CTT_OK",,aTRB1,@lINVERTE,@cMARCA)
+oMARK1:oBROWSE:ALIGN := CONTROL_ALIGN_ALLCLIENT  
+oMARK1:bMARK := {|| MDTA869INV(,.F.,oMARK1)}
+oMARK1:oBROWSE:bALLMARK := {|| MDTA869INV(cMarca, .T.,oMARK1)}
+ACTIVATE MSDIALOG oDlg ON INIT EnchoiceBar(oDlg,{|| nOpca1 := 1,oDlg:End()},{|| nOpca1 := 2,oDlg:End()}) CENTERED	
+If nOpca1 == 1
+	dbSelectArea(cAliasCTT)
+	dbSetOrder(2) 
+	dbGoTop()
+	While !Eof() .AND. !Empty((cAliasCTT)->CTT_OK)
+		AADD(aCCusto,(cAliasCTT)->CTT_CUSTO)
+		dbSkip()	
+	End
+EndIf
+
+Return
+ 
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³MDTA869INV³ Autor ³ Rodrigo Soledade		  ³ Data ³22/06/2011³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Funcao que cria no campo CTT_MARK o espelho do campo CTT_OK³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ MDTR869                                                    ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function MDTA869INV(cMARK, ALL, oMARK1) 
+	Local aArea := GetArea()
+	(cAliasCTT)->CTT_MARK := IF(!Empty((cAliasCTT)->CTT_OK),Space(2),"ZZ")
+ 	
+	If ALL
+		Dbselectarea((cAliasCTT))
+		Dbgotop()
+		While !eof()
+			If Empty((cAliasCTT)->CTT_OK)
+				(cAliasCTT)->CTT_OK := cMARCA 
+				(cAliasCTT)->CTT_MARK := Space(2)   
+			Else
+				(cAliasCTT)->CTT_OK := Space(2)
+				(cAliasCTT)->CTT_MARK := "ZZ"   
+			EndIf	
+			Dbskip()	
+		End
+		oMARK1:oBROWSE:REFRESH(.T.)
+	EndIf
+	RestArea(aArea)	
+
+Return
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ MDT869FLVL  ³ Autor ³ Rodrigo Soledade³ Data ³ 28/06/11 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Valida os campos De/Ate Filial                          ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Generico                                                ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function MDT869FLVL(nTipo)
+Local lRet := .T.
+Local cArea := Alias()
+Local aArea := SM0->(GetArea())
+
+If nTipo == 1
+	If !Empty(Mv_par06)
+		dbSelectArea("SM0")
+		If !dbSeek(cEmpAnt+Mv_par06)
+			Help(" ",1,"REGNOIS")
+			lRet := .F.
+		Endif
+		If Mv_par06 > Mv_par07
+			Mv_par07 := Mv_par06
+		Endif
+	Endif
+Else
+	If Mv_par07 <> Replicate("Z",Len(Mv_par07)) .and. Mv_par07 <> Replicate("9",Len(Mv_par07))
+		If Mv_par06 > Mv_par07
+			Help(" ",1,"DEATEINVAL")
+			lRet := .F.
+		Else
+			dbSelectArea("SM0")
+			If !dbSeek(cEmpAnt+Mv_par07)
+				Help(" ",1,"REGNOIS")
+				lRet := .F.
+			Endif
+		Endif
+	Endif
+Endif  
+
+RestArea(aArea)
+dbSelectArea(cArea)
+
+Return lRet
+

@@ -1,0 +1,738 @@
+#INCLUDE "PROTHEUS.CH"
+#INCLUDE "TBICONN.CH"
+#INCLUDE "RWMAKE.CH"
+#INCLUDE "PONWORK.CH"
+/*
+CONFIGURACAO DE JOB NO APPSERVER.INI
+[OnStart]
+Jobs=JOB1
+
+[JOB1]
+Main=U_TFPONM03
+Environment=P12NOVA
+nParms=2
+
+Parm1=99
+Parm2=01
+
+*/
+/*
+ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿
+³Programa  ³PonWork   ³ Autor ³ Marinaldo de Jesus    ³ Data ³21/11/2001³
+ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´
+³Descri‡„o ³Exemplo de Programa Para Agendamento de Rotinas em WorkFlow ³
+ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³Sintaxe   ³ Void                                                       ³
+ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ Uso      ³Modelo Desenvolvido para Agendamento do PONM010 -   Processo³
+³          ³de Leitura e Apontamento de Marcacoes					    ³
+ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³          ATUALIZACOES SOFRIDAS DESDE A CONSTRU€AO INICIAL.		    ³
+ÃÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³Programador ³ Data   ³ BOPS ³  Motivo da Alteracao                     ³
+ÃÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³            ³        ³      ³                                 		  	³
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+³Programador  ³ Data     ³ FNC            ³  Motivo da Alteracao                      ³
+ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ³
+³Rogerio R.   ³29/07/2009³00000018267/2009³Compatibilizacao dos fontes para aumento do³
+³             ³          ³                ³campo filial e gestão corporativa.         ³
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+³ As Instrucoes Abaixo deverao ser Incluidas no INI do Server			³
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+[ONSTART]
+JOBS=LEITURA_CLASSIFICACAO	//Define o Nome do Job
+
+[LEITURA_CLASSIFICACAO]		//Configuracoes do Job
+Main=u_StartJobPon			//ou Main=wfStart() se tiver apenas uma empresa
+Environment=Environment		//Nome do Environment que devera ser utilizado
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+³ A chamada abaixo devera ser Incluida no Agendamento do WorkFlow		³
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+u_PonScheduler(		"01"	,;	//01 -> Codigo da Empresa no SIGAMAT
+				 	"01"	,;	//02 -> Codigo da Filial no SIGAMAT
+				 	.F.		,;	//03 -> Utilizar os Parametros do SX1 para o Processo de Leitura / Apontamento
+				 	.T.		,;	//04 -> Limitar a Data Final do Apontamento aa DataBase do Sistema
+				 	.T.		,;	//05 -> Efetuar o Apontamento Por Filial
+				 	.F.		,;	//06 -> Efetua Apontamento para Relogios nao Lidos
+				 	.F.		,;	//07 -> Forcar o Reapontamento das Marcacoes   
+				 	.F.		,;  //08 -> Processa apenas a filial passada como parametro 
+				 	"3"		,;  //09 -> Se processa leitura, apontamento ou ambos ('1'->Leitura , '2'->Apontamento , '3'->Ambos)
+				 	"2"		,;  //10 -> Se efetua a leitura a partir do cadastro de funcionarios ou relogios('1'->Funcionario , '2'->Relogio)
+			   )
+
+//-- Configuração da Taiff
+U_PONSCHEDULER("99","01",.F.,.T.,.F.,.F.,.T.,.F.)
+
+ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿
+³Fun‡…o    ³PonScheduler ³ Autor ³ Marinaldo de Jesus ³ Data ³21/11/2001³
+ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´
+³Descri‡…o ³Prepara o Ambiente da Empresa e Executa a  Leitura/Apontamen³
+³          ³to														    ³
+ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³Sintaxe   ³u_PonScheduler( aUserDefParam )								³
+ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³Parametros³aUserDefParam -> Array contendo os Parametros do Usuario	³
+³          ³       														³
+³Conteudo  ³aUserDefParam[01]Codigo da Empresa no SIGAMAT				³
+³          ³       														³
+³          ³aUserDefParam[02]Codigo da Filial no SIGAMAT  				³
+³          ³       														³
+³          ³aUserDefParam[03]Se .T. caracterizara que o Programa  devera³
+³          ³                 utilizar os Parametros do Programa de Leitu³
+³          ³                 ra/Apontamento, confome Definidos pelo Usua³
+³          ³                 rio. Caso Contrario Ira considerar os Para ³
+³          ³                 metros De/Ate de Forma Generica. 			³
+³          ³       														³
+³          ³aUserDefParam[04]Se a Data Fim dos Parametros deve ser limi-³
+³          ³                 tada a Menor Data entra a DataBase e o Fim ³
+³          ³                 do Periodo de Apontamento					³
+³          ³aUserDefParam[05]Se Deve Processar Por Filial               ³
+³          ³aUserDefParam[06]Se Deve Efetuar Apontamento Quando nao Con-³
+³          ³                 seguiu Ler o Arquivo do Relogio            ³
+³          ³aUserDefParam[07]Se Deve Forcar o Reapontamento 			³
+³          ³aUserDefParam[08]Se Utiliza a Filial passada como a que de- ³
+³          ³                 vera ser processada como parametro.		³
+³          ³aUserDefParam[09]Se efetua o processo de leitura,apontamento³
+³          ³                 ou realiza ambos.							³
+³          ³aUserDefParam[10]Se efetua a leitura a partir do cadastro de³
+³          ³                 funcionarios ou do cadastro de relogios.	³
+ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³Uso       ³PonWork                                                    	³
+ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³Observacao³Essa Funcao devera ser Cadastrada no Agendamento           	³
+ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ*/
+User Function PonScheduler( aUserDefParam )
+
+Local aFiliais			:= {} 
+Local cEmp				:= ""
+Local cFil				:= ""
+Local lUserDefParam		:= .F.
+Local lLimitaDataFim	:= .T.
+Local lProcFilial		:= .F.
+Local lApontaNaoLidas	:= .T.
+Local lForceReaponta	:= .T.  
+Local lSomentecFil		:= .F.
+Local cProcessa			:= "3"  //11 -> '1'->Leitura , '2'->Apontamento , '3'->Ambos
+Local cTipoRel			:= "1"  //12 -> '1'->Funcionario , '2'->Relogio
+Local nUserParam		:= 0.00
+Local nLenParam			:= 0.00
+Local nFilial			:= 0.00
+Local nx				:= 1
+Local _i				:= 0
+
+Private aArqsDir		:= {}
+Private _cBodyMail		:= ""
+Private dIniPonMes		:= dBkIniPon	:= dIniAntPon	:= ctod("")
+Private dFimPonMes		:= dBkFimPon	:= dFimAntPon	:= ctod("")
+Private cDataDe			:= ctod("")
+Private cDataAte		:= ctod("")
+Private cFilialDe		:= ""
+Private cFilialAte		:= ""
+Static lPort1510 		:= Port1510() 
+l_ExecManual	:= If(Type("l_ExecManual")=="U",.F.,l_ExecManual)
+
+/*
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+³ Verifica os Parametros passados          								³
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ*/
+IF ( !Empty( aUserDefParam ) .and. ValType( aUserDefParam ) == "A" )
+	nLenParam := Len( aUserDefParam )
+	nLenParam := 2	//-- apenas empresa e filial
+	For nUserParam := 1 To nLenParam
+		Do Case
+			Case ( nUserParam == 1 ) ; cEmp          	:= IF( ( ValType( aUserDefParam[ nUserParam ] ) == "C" ) , aUserDefParam[ nUserParam ] , ""	 )
+			Case ( nUserParam == 2 ) ; cFil				:= IF( ( ValType( aUserDefParam[ nUserParam ] ) == "C" ) , aUserDefParam[ nUserParam ] , ""	 )
+		End Case
+	Next nUserParam
+EndIF
+
+//-- Recebe as filiais via parametrização de processamento
+cFilialDe		:= IF( ( ValType( aUserDefParam[ 3 ] ) == "C" ) .And. cEmp == "09" , aUserDefParam[ 3 ] , "  "	 )
+cFilialAte		:= IF( ( ValType( aUserDefParam[ 4 ] ) == "C" ) .And. cEmp == "09" , aUserDefParam[ 4 ] , "99"	 )
+
+//-- Fixa o processamento
+lUserDefParam	:= .F.
+lLimitaDataFim	:= .T.
+lProcFilial		:= .F.
+lApontaNaoLidas	:= .T.
+lForceReaponta	:= .T.
+lSomentecFil	:= .F.
+//iniParam()
+Private cSMTPServer := GetMV("MV_RELSERV",,"smtp.mail.yahoo.com.br")
+Private cSMTPUser   := GetMV("MV_RELAUSR",,"user@yahoo.com.br")
+Private cSMTPPass   := GetMV("MV_RELAPSW",,"minhasenha")
+Private cMailFrom   := GetMV("MV_RELACNT",,"minhaconta@yahoo.com.br")
+Private nPort       := GetMV("MV_GCPPORT",,587)
+Private lUseAuth    := GetMV("MV_RELAUTH",,.T.)
+Private cMailConta  := GETMV("MV_RELACNT")	
+Private cMailTo  	:= GETMV("MV_MAILPRE",,"email@servidor.com.br")
+
+//-- Tratamento de datas e períodos
+//-- Sempre tratar até o dia anterior
+//-- Por padrão a leitura e apontamento sempre ocorrerá no dia seguinte (madrugada)
+dDatabase	:= (date()-1)
+
+//-- Obtem datas do Periodo em Aberto
+GetPonMesDat( @dIniPonMes , @dFimPonMes )
+
+//-- Salva as datas do período em aberto para processamento nos dias 16, 17 e 18 do período seguinte
+dIniAntPon	:= dIniPonMes
+dFimAntPon	:= dFimPonMes
+
+//-- Se a database estiver fora do período movimenta troca para o próximo período para fazer a leitura
+If dDataBase > dIniPonMes .And. dDataBase > dFimPonMes
+	dIniPonMes	:= monthsum(dIniPonMes,1)
+	dFimPonMes	:= Min(dDataBase,monthsum(dFimPonMes,1))
+//-- Se a data base estiver dentro do período de apontamento limita a data final para fazer a leitura, pois de fato a data final é a data base corrente
+ElseIf dDataBase > dIniPonMes .And. dDataBase <= dFimPonMes
+	dFimPonMes	:= Min(dDataBase,dFimPonMes)
+Endif
+
+dBkIniPon	:= dIniPonMes
+dBkFimPon	:= dFimPonMes
+//mv_par13 	:= dIniPonMes
+//mv_par14	:= dFimPonMes
+cDirDe 		:= GetMv( "MV_DIRRELD",, "\servcom\" )
+cDirBkp		:= GetMv( "MV_DIRRELB",, "\servcom\backup\" )
+
+//-- Criado laço para controlar a leitura dos relógios
+aArqsDir	:= {}
+//-- Ajuste de performance: passamos a considerar os quatro últimos dias.
+//-- Nos 4 primeiros dias do período, a data inicial será o próprio dia inicial do período, 
+//-- pois a rotina não misturará os períodos para leitura.
+dIniPonMes	:= If(nx==1,Max(dBkIniPon,dBkFimPon-3),dBkIniPon)
+
+// Copiar os arquivos do diretorio de Backup para o de leitura //
+fCpyFiles(@aArqsDir,nx)
+
+//-- Ajusta os parâmetros dos usuário pontoeletronico
+fAjustaPar(nx)
+
+/*
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+³ Processando a Leitura/Apontamento                           			³
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ*/
+
+/*
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+³ Posiciona o SM0 na Filial a ser Processada                  			³
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ*/
+SM0->( DbSeek(cEmp+cFil) )
+
+/*
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+³ Enviando Mensagens para o Console do Server                 			³
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ*/
+ConOut("* * * PONWORK - Inicio "+Dtoc( MsDate() ) + " as " + Time()+" - Empresa: " + SM0->( M0_CODIGO + " - " + AllTrim( M0_NOMECOM ) ) )
+
+_cBodyMail := '<HTML><body>"
+_cBodyMail += '<p><p>'
+_cBodyMail += 'Empresa: ' + SM0->( FWGETCODFILIAL + " - " + AllTrim( M0_NOMECOM ) ) + '<p>'
+
+/*
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+³ Chamada a Funcao de Leitura e Apontamento das Marcacoes     			³
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ*/
+Ponm010(	.t.					,;	//Define Que a Chamada Esta Sendo Efetuada Atraves do WorkFlow
+			lUserDefParam				,;	//Verifica Se Devera Considerar os Parametros Pre-Definidos Pelo Usuario
+			lLimitaDataFim				,;	//Verifica Se Devera Limitar a Data Fim a Menor Data entre a DataBase e o Periodo Final de Apontamento
+			cFil						,;	//Filial a ser processada
+			lProcFilial					,;	//Processo por Filial
+			lApontaNaoLidas				,;	//Se Aponta as Marcacoes para as Filiais nao Lidas
+			lForceReaponta				,;	//Forcar o Reapontamento das Marcacoes
+			nil	,;
+			nil	,;
+			nil ,;
+			cProcessa   ,;  //11 -> '1'->Leitura , '2'->Apontamento , '3'->Ambos
+			cTipoRel    ,;  //12 -> '1'->Funcionario , '2'->Relogio
+			dIniPonMes  ,;
+			dFimPonMes 		)
+/*
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+³ Enviando Mensagens para o Console do Server                 			³
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ*/
+// "Final da Leitura/Apontamento em: "###" as "
+ConOut("* * * PONWORK - Final "+Dtoc( MsDate() ) + " as " + Time()+" - Empresa: " + SM0->( M0_CODIGO + " - " + AllTrim( M0_NOMECOM ) ) )
+
+            _cBodyMail += "</body></html>" 
+    	        
+			SendMail(cMailTo, _cBodyMail) 
+
+Aviso("Aviso","* * * PONWORK Finalizado - Empresa: " + SM0->( M0_CODIGO + " - " + AllTrim( M0_NOMECOM ) ) ,{"Ok"})
+
+//-- Renomeia os arquivos lidos após o processamento na origem do arquivo
+If Len(aArqsDir) > 0
+	For _i:=1 to len(aArqsDir)
+		If File(AllTrim(aArqsDir[_i][2])) // Verificar a existencia do arquivo na Pasta de Destino
+			//-- Salvo a origem como BKP
+			//-- Copia da pasta origem para a pasta BKP, renomeando o arquivo texto para a data e hora da geração.
+			__copyfile(AllTrim(aArqsDir[_i][2]),;
+			cDirBkp+StrTran(StrTran(aArqsDir[_i][2],".txt", "_"+DtoS(dDataBase)+"_"+STRTRAN(TIME(),":","")+".txt"),cDirDe,cDirBkp);
+			)
+			if ("ebc" $ aArqsDir[_i][2])
+				if (cEmpAnt == "02")
+					fErase( AllTrim(aArqsDir[_i][2]))
+				endif
+			else
+				fErase( AllTrim(aArqsDir[_i][2]))
+			endif
+		EndIf
+	Next _i
+Endif
+
+Return( NIL )
+
+/*
+ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿
+³Fun‡…o    ³fCpyFiles    ³ Autor ³ Marinaldo de Jesus ³ Data ³21/11/2001³
+ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´
+³Descri‡…o ³Copiar os arquivos de uma pasta para outra                  ³
+ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³Sintaxe   ³             												³
+ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³Uso       ³PonWork                                                    	³
+ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³Observacao³Essa Funcao devera ser Incluida no .INI do Server          	³
+ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ*/
+Static Function fCpyFiles(aArqsDir,nTpRelogio)
+Local cExclRelog:= ""
+Local _i		:= 0
+Local nFileTXT := ""
+DEFAULT aArqsDir := {}
+
+//-- Zera o array para sempre reiniciar a cópia dos arquivos de relógios
+aArqsDir := {}
+
+// Tratar os relogios que nao devem ser lidos //
+//-- Se for o primeiro processamento forçamos o relogio 99 como exceção - pois é utilizado para cargas manuais como feiras, manutenção de relogio, etc
+//-- Se for o segundo processamento forçamos os relógios de 80 a 88 como exceção, pois alteraremos o período de leitura.
+//cExclRelog 	:= GetMv( "MV_EXCRELO",, Space(20) )+If(nTpRelogio==1,"99,",If(nTpRelogio==2,"99,"))
+cExclRelog := '99 '
+DbSelectArea( "SP0" )
+DbGoTop()
+While !Eof() 
+        
+	// Nao devera processar os relogios que estiverem no parametro //
+	If !(SP0->P0_RELOGIO $ cExclRelog) .AND. SP0->P0_CONTROL = 'P' .And.;
+		SP0->P0_FILIAL >= cFilialDe .And. SP0->P0_FILIAL <= cFilialAte
+
+		// Parsear a origem da informacao //
+		nPosTXT := At( ".txt", lower(SP0->P0_ARQUIVO ))
+		If nPosTXT > 0
+			nFileTXT := ".txt"
+			For _i := nPosTXT To 0 Step -1
+				If !(Substr(SP0->P0_ARQUIVO, _i-1, 1 ) $ "\/")
+					nFileTXT := Substr(SP0->P0_ARQUIVO, _i-1, 1 ) + nFileTXT
+				Else
+					_i := 0
+				EndIf		
+			Next _i
+		EndIf
+		
+		aAdd( aArqsDir, { SP0->P0_RELOGIO, cDirDe+nFileTXT, SP0->P0_ARQUIVO, .F. , SP0->P0_FILIAL } )
+	EndIf
+
+	DbSelectArea("SP0" )
+	DbSkip()
+Enddo
+
+//-- Copia dos arquivos do relógio
+For _i:=1 to len(aArqsDir)
+
+	If File(AllTrim(aArqsDir[_i][2])) // Verificar a existencia do arquivo De
+		aArqsDir[_i][4]	:= .T.
+	EndIf
+
+Next _i
+
+Return
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³SendMail  º Autor ³ RICARDO DUARTE     º Data ³  02/12/12   º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDescricao ³Enviar o e-mail 											  º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³cPerg -> Nome com  grupo de perguntas em questão.           º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß/*/
+Static Function SendMail(cToMail, cBody)
+
+	Local oMail
+	Local oMessage
+	Local nErro
+	
+	Local lRet := .T.
+	
+	Local cCopia := "" 
+
+	oMail := TMailManager():New()
+
+	oMail:Init( '', cSMTPServer , cSMTPUser, cSMTPPass, 0, nPort )
+
+	oMail:SetSmtpTimeOut( 30 )
+
+	nErro := oMail:SmtpConnect()
+
+	If lUseAuth
+   		nErro := oMail:SmtpAuth(cSMTPUser, cSMTPPass)
+     
+     	If nErro <> 0
+          	// Recupera erro ...
+          	cMAilError := oMail:GetErrorString(nErro)
+          	DEFAULT cMailError := '***UNKNOW***'
+          	
+          	Conout("Erro de Autenticacao " + str(nErro,4) + ' (' + cMAilError + ')')
+          	lRet := .F.
+     	Endif
+	EndIf
+
+	If nErro <> 0
+     
+     	// Recupera erro
+     	cMAilError := oMail:GetErrorString(nErro)
+     	DEFAULT cMailError := '***UNKNOW***'
+
+     	Conout("Erro de Conexão SMTP "+str(nErro,4) + ' (' + cMAilError + ')' )
+     
+     	oMail:SMTPDisconnect()
+     
+     	lRet := .F.
+     
+	EndIf
+
+	If lRet
+     	oMessage := TMailMessage():New()
+     	oMessage:Clear()
+     	oMessage:cFrom     		:= cMailFrom
+     	oMessage:cTo     		:= cTomail
+     	If !Empty(cCopia)
+          	oMessage:cCc     	:= cCopia
+     	EndIf
+     	
+     	oMessage:cSubject     	:= "Leitura e Apontamento do Ponto Eletronico por JOB - Empresa: " + SM0->( M0_CODIGO + " - " + AllTrim( M0_NOMECOM ) )
+     	oMessage:cBody        	:= cBody
+
+		nErro := oMessage:Send( oMail )
+          
+     	If nErro <> 0
+          	xError := oMail:GetErrorString(nErro)
+          	Conout("Erro de Envio SMTP "+str(nErro,4)+" ("+xError+")")
+          	lRet := .F.
+     	EndIf
+     
+     	oMail:SMTPDisconnect()
+	EndIf
+
+Return(lRet)
+
+
+
+//////////////////////////////
+Static Function fAjustaPar(nTpRelogio) //
+//////////////////////////////
+
+//Ajusta perguntas de filial de/ate para a filial do arquivo em processamento
+SX1->( dbSetOrder(1) )
+SX1->( dbSeek("PNM010    01") )
+
+//³FILIAL DE                  ³
+RecLock("SX1", .F.)
+SX1->X1_CNT01 := '01' //cFilialDe
+SX1->(MsUnlock() )
+SX1->( dbSkip() )
+
+//³FILIAL ATE                 ³
+RecLock("SX1", .F.)
+SX1->X1_CNT01 := '99' //cFilialAte
+SX1->(MsUnlock() )
+SX1->( dbSkip() )
+
+//³C CUSTO DE                 ³
+RecLock("SX1", .F.)
+SX1->X1_CNT01 := SPACE(20)
+SX1->(MsUnlock() )
+SX1->( dbSkip() )
+
+//³C CUSTO ATE                ³
+RecLock("SX1", .F.)
+SX1->X1_CNT01 := REPLICATE("Z", 20)
+SX1->(MsUnlock() )
+SX1->( dbSkip() )
+
+//³TURNO DE                   ³
+RecLock("SX1", .F.)
+SX1->X1_CNT01 := "   "
+SX1->(MsUnlock() )
+SX1->( dbSkip() )
+
+//³TURNO ATE                  ³
+RecLock("SX1", .F.)
+SX1->X1_CNT01 := "ZZZ"
+SX1->(MsUnlock() )
+SX1->( dbSkip() )
+
+//³MATR DE                    ³
+RecLock("SX1", .F.)
+SX1->X1_CNT01 := SPACE(06)
+SX1->(MsUnlock() )
+SX1->( dbSkip() )
+
+//³MATR ATE                   ³
+RecLock("SX1", .F.)
+SX1->X1_CNT01 := REPLICATE("Z", 6)
+SX1->(MsUnlock() )
+SX1->( dbSkip() )
+
+//³NOME DE                    ³
+RecLock("SX1", .F.)
+SX1->X1_CNT01 := SPACE(30)
+SX1->(MsUnlock() )
+SX1->( dbSkip() )
+
+//³NOME ATE                   ³
+RecLock("SX1", .F.)
+SX1->X1_CNT01 := REPLICATE("Z",20)
+SX1->(MsUnlock() )
+SX1->( dbSkip() )
+
+//³RELOGIO DE                 ³
+RecLock("SX1", .F.)
+SX1->X1_CNT01 := "   " //"   "
+SX1->(MsUnlock() )
+SX1->( dbSkip() )
+
+//³RELOGIO ATE                ³
+RecLock("SX1", .F.)
+SX1->X1_CNT01 := "899" //"899"
+SX1->(MsUnlock() )
+SX1->( dbSkip() )
+
+//³PERIODO DE                 ³
+RecLock("SX1", .F.)
+SX1->X1_CNT01 := dtoc(dIniPonMes)
+SX1->(MsUnlock() )
+SX1->( dbSkip() )
+
+//³PERIODO ATE                ³
+RecLock("SX1", .F.)
+SX1->X1_CNT01 := dtoc(dFimPonMes)
+SX1->(MsUnlock() )
+SX1->( dbSkip() )
+
+//³REGRA DE                   ³
+RecLock("SX1", .F.)
+SX1->X1_CNT01 := "  "
+SX1->(MsUnlock() )
+SX1->( dbSkip() )
+
+//³REGRA ATE                  ³
+RecLock("SX1", .F.)
+SX1->X1_CNT01 := "ZZ"
+SX1->(MsUnlock() )
+SX1->( dbSkip() )
+
+//³PROCESSAMENTO              ³
+RecLock("SX1", .F.)
+SX1->X1_CNT01 := "3"   //Ambos
+SX1->X1_PRESEL := If(nTpRelogio==1,1,3)   //Ambos
+SX1->(MsUnlock() )
+SX1->( dbSkip() )
+
+//³LEITURA APONT              ³
+RecLock("SX1", .F.)
+SX1->X1_CNT01  := "1"   //Marcacao
+SX1->X1_PRESEL := 1
+SX1->(MsUnlock() )
+SX1->( dbSkip() )
+
+//³REAPONTAR                  ³
+RecLock("SX1", .F.)
+SX1->X1_CNT01 := "1"   //Marcações
+SX1->X1_PRESEL := 1
+SX1->(MsUnlock() )
+SX1->( dbSkip() )
+
+//³LER A PARTIR               ³
+RecLock("SX1", .F.)
+SX1->X1_CNT01 := "1"
+SX1->X1_PRESEL := 1   //Cad.Relogio
+SX1->(MsUnlock() )
+SX1->( dbSkip() )
+
+//³CATEGORIAS                 ³
+RecLock("SX1", .F.)
+SX1->X1_CNT01 := "ACDEGHIJMPST"
+SX1->(MsUnlock() )
+SX1->( dbSkip() )
+
+//³SITUAÇÕES          ³
+RecLock("SX1", .F.)
+SX1->X1_CNT01 := " A*FT"
+SX1->(MsUnlock() )
+SX1->( dbSkip() )
+
+Return
+
+//-- Chamada do processamento genérico - informar os parâmetros no JOB
+User Function TFPONM01(cEmp,cFil, cHora)
+
+Local cQry     := ""
+Local cNmTab   := ""
+Local oSetup
+Local cIdEnt   := ""
+Local cDirXml  := ""
+Local cInsSql  := ""
+Local nExecLog := 0
+Local nSleep   := 60000
+Local cBarra   := ""
+Local cFileLck := "xmailxml.lck"
+//Default cEmp := "01"
+//Default cFil := "01"
+Default cHora := "22:30:00"
+RPCSetType(3)  // Nao comer licensa
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Retirado PREPARE ENVARIMEND porque em alguns casos trava o JOB³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+RPCSETENV(cEmp, cFil,,,"PON")
+
+While .T.
+
+	if time() == cHora .or. time() == GetMV("TF_LERPTO",,"22:30:00")
+
+		CONOUT("** LEITURA DO PONTO AUTOMATICA INICADA - ENTROU NO HORARIO AGENDADO"+ TIME())
+
+		//21-Out-2021 Ronald Piscioneri: a funcao PTINTERNAL foi comentada, pois seu uso e'
+		//restrito ao Protheus Padrao a partir da Release 12.1.33
+		//PtInternal(1, "Job sera inciado...." + TIME())
+
+		u_ponscheduler({cEmp,cFil,"01","99"}) 
+
+		CONOUT("** LEITURA DO PONTO AUTOMATICA FINALIZADA -  HORARIO"+ TIME())
+
+		//21-Out-2021 Ronald Piscioneri: a funcao PTINTERNAL foi comentada, pois seu uso e'
+		//restrito ao Protheus Padrao a partir da Release 12.1.33
+		//PtInternal(1, "Job sera finalizado...." + TIME())
+		//exit
+
+	endif
+enddo
+
+RpcClearEnv()
+
+Return
+
+User Function TFPONDEL()
+Local cHora := "23:00:00"
+Local aArqs := {}
+Local _i
+while .t.
+	if time() == cHora
+		aArqs := Directory( "\relogio\*.txt" )
+		for _i:= 1 to len(aArqs)
+			if __copyfile( aArqs[_i,1],"\relogio\backup\"+StrTran( upper(aArqs[_i,1]), ".TXT", dtos(date())+STRTRAN(TIME(),":","")+".txt" ) )
+				fErase( aArqs[_i,1] )
+			endif
+		next
+		exit
+	endif	
+enddo
+return
+
+//inicia parametros de usuario
+static Function iniParam()
+Local cChar := 'Z'
+
+mv_par01  := '01' //filial de
+mv_par02  := '99' //filial
+mv_par03  := "" //cCCDe
+mv_par04  := Replicate(cChar,Len(SRA->RA_CC) )	//Centro de Custo Ate
+mv_par05  := ""//Turno De
+mv_par06  := Replicate(cChar,Len(SRA->RA_TNOTRAB) )	 //Turno Ate
+mv_par07  := ""  								//Matricula De
+mv_par08  := Replicate(cChar,Len(SRA->RA_MAT) ) //Matricula Ate
+mv_par09  := ""									//Nome De
+mv_par10  := Replicate(cChar,Len(SRA->RA_NOME) ) 	//Nome Ate
+mv_par11  := ""										//Relogio De
+mv_par12  := Replicate(cChar,Len(SP0->P0_RELOGIO) ) //Relogio Ate
+mv_par13  := dDataBase-1							//Periodo De
+mv_par14  := dDataBase  //Periodo Ate
+mv_par15  := ""										//Regra De
+mv_par16  := Replicate(cChar,Len(SRA->RA_REGRA) ) 	//Regra Ate
+mv_par17  := 3				//Tipo de Processamento 1=Leitura 2=Apontamento 3=Ambos
+mv_par18  := 1				//Leitura/Apontamento 1=Marcacoes 2=Refeicoes 3=Acesso 4=Marcacoes e Refeicoes 5=Todos
+mv_par19  := 3	//Reapontar 1= Marcacoes 2=Refeicoes 3=Ambos 4=Nenhum
+mv_par20  := 3	//Reapontar 1= Marcacoes 2=Refeicoes 3=Ambos 4=Nenhum
+mv_par21  := "ACDEGHMPST"		//Categorias
+mv_par22  := " ADFT"			//Situações
+
+Return(Nil)
+
+
+
+// Programa:   TFPNM01B
+// Descricao:  Aciona funcao que faz o registro do ponto eletronico
+// Observacao: Este programa pode ser configurado no Schedule, ex.: U_TFPNM01B("03","01")
+// Autor:      Ronald Piscioneri
+// Data:       25-Nov-2021
+User Function TFPNM01B( cEmp, cFil )
+Default cEmp := "03"
+Default cFil := "01"
+
+RPCSetType(3)
+RPCSetEnv(cEmp, cFil,,,"PON")
+
+ConOut(" ")
+ConOut("---------------------------------------------------------------------------------------")
+ConOut("TFPNM01B INICIO Leitura de Ponto Emp."+cEmp+"-Fil."+cFil+": "+DtoC(Date()) + " " + Time() )
+ConOut("---------------------------------------------------------------------------------------")
+ConOut(" ")
+U_PonScheduler({cEmp,cFil,"01","99"}) 
+ConOut(" ")
+ConOut("---------------------------------------------------------------------------------------")
+ConOut("TFPNM01B FIM Leitura de Ponto Emp."+cEmp+"-Fil."+cFil+": "+DtoC(Date()) + " " + Time() )
+ConOut("---------------------------------------------------------------------------------------")
+ConOut(" ")
+
+RpcClearEnv()
+
+Return(Nil)
+
+// Programa:   TFPT0301
+// Descricao:  Executa TFPNM01B diretamente do SmartClient como empresa 03 filial 01
+// Autor:      Ronald Piscioneri
+// Data:       25-Nov-2021
+User Function TFPT0301()
+U_TFPNM01B("03","01")
+Return(Nil)
+
+// Programa:   TFPT0302
+// Descricao:  Executa TFPNM01B diretamente do SmartClient como empresa 03 filial 02
+// Autor:      Ronald Piscioneri
+// Data:       25-Nov-2021
+User Function TFPT0302()
+U_TFPNM01B("03","02")
+Return(Nil)
+
+// Programa:   TFPT0401
+// Descricao:  Executa TFPNM01B diretamente do SmartClient como empresa 04 filial 01
+// Autor:      Ronald Piscioneri
+// Data:       25-Nov-2021
+User Function TFPT0401()
+U_TFPNM01B("04","01")
+Return(Nil)
+
+// Programa:   TFPT0402
+// Descricao:  Executa TFPNM01B diretamente do SmartClient como empresa 04 filial 02
+// Autor:      Ronald Piscioneri
+// Data:       25-Nov-2021
+User Function TFPT0402()
+U_TFPNM01B("04","02")
+Return(Nil)
