@@ -1,0 +1,743 @@
+#INCLUDE "MATR790.CH"
+#INCLUDE "FIVEWIN.CH"
+#INCLUDE "Topconn.ch"
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+?????????????????????????????????????????????????????????????????????????????
+??ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ???
+???Programa  ? MATR790  ? Autor ? Marco Bianchi         ? Data ? 21/07/06 ???
+???ÄÄÄÄÄÄÄÄÄÄ?ÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´??
+???Descri??o ? Romaneio de Despacho  (Expedicao) - Release 4.             ???
+???ÄÄÄÄÄÄÄÄÄÄ?ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´??
+???Uso       ? SIGAFAT                                                    ???
+???ÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ???
+?????????????????????????????????????????????????????????????????????????????
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+User Function MATR790T()
+
+Local oReport
+Local xAlias := GetArea()
+
+oReport := ReportDef()
+oReport:PrintDialog()
+
+RestArea(xAlias)
+
+Return
+
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+?????????????????????????????????????????????????????????????????????????????
+??ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ???
+???Programa  ?ReportDef ? Autor ? Marco Bianchi         ? Data ? 21/07/06 ???
+???ÄÄÄÄÄÄÄÄÄÄ?ÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´??
+???Descri??o ?A funcao estatica ReportDef devera ser criada para todos os ???
+???          ?relatorios que poderao ser agendados pelo usuario.          ???
+???          ?                                                            ???
+???ÄÄÄÄÄÄÄÄÄÄ?ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´??
+???Retorno   ?ExpO1: Objeto do relatório                                  ???
+???ÄÄÄÄÄÄÄÄÄÄ?ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´??
+???Parametros?Nenhum                                                      ???
+???          ?                                                            ???
+???ÄÄÄÄÄÄÄÄÄÄ?ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´??
+???   DATA   ? Programador   ?Manutencao efetuada                         ???
+???ÄÄÄÄÄÄÄÄÄÄ?ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ?ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´??
+???          ?               ?                                            ???
+???ÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ???
+?????????????????????????????????????????????????????????????????????????????
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function ReportDef()
+
+	Local oReport
+	Local nTotLib  := 0
+	Local nTotal   := 0
+	Local nTamCGC  := 18
+	Local cAliasSC9 := cAliasSC5 := cAliasSF2 := cALiasSB1 := cAliasSA1 := cALiasSC6 := GetNextAlias()
+
+	//Criacao do componente de impressao
+	//-----------------------------------------------------------------------
+	//TReport():New
+	//ExpC1 : Nome do relatorio
+	//ExpC2 : Titulo
+	//ExpC3 : Pergunte
+	//ExpB4 : Bloco de codigo que sera executado na confirmacao da impressao
+	//ExpC5 : Descricao
+
+	oReport := TReport():New("MATR790T","Romaneio de Despacho  (Expedicao)","MTR790T", {|oReport| ReportPrint(oReport,cAliasSC9,cAliasSC5,cAliasSF2,cALiasSB1,cAliasSA1,cAliasSC6)},"Emissao do Romaneio de Despacho para a Expedicao, Armazem" + " " + "atraves de intervalo de Pedidos informado na opçäo Parâmetros.")
+	oReport:SetPortrait()
+	oReport:SetTotalInLine(.F.)
+	oReport:cFontBody := "Courier New"
+	oReport:nFontBody := 13
+	oReport:SetColSpace(1,.T.)
+	oReport:SetLineHeight(50)
+	Pergunte(oReport:uParam,.F.)
+
+
+	//-----------------------------------------------------------------------
+	//Criacao da secao utilizada pelo relatorio
+	//-----------------------------------------------------------------------
+	//TRSection():New
+	//ExpO1 : Objeto TReport que a secao pertence
+	//ExpC2 : Descricao da seçao
+	//ExpA3 : Array com as tabelas utilizadas pela secao. A primeira tabela
+	//        sera considerada como principal para a seç?o.
+	//ExpA4 : Array com as Ordens do relatório
+	//ExpL5 : Carrega campos do SX3 como celulas
+	//        Default : False
+	//ExpL6 : Carrega ordens do Sindex
+	//        Default : False
+	//-----------------------------------------------------------------------
+
+	oCabec := TRSection():New(oReport,"Cabecalho",{"SC5","SA4"},/*{Array com as ordens do relatório}*/,/*Campos do SX3*/,/*Campos do SIX*/)
+	oCabec:SetLineStyle(.T.)
+	TRCell():New(oCabec,"C5_TRANSP"		,/*Tabela*/	,RetTitle("C5_TRANSP")	,PesqPict("SC5","C5_TRANSP"	),TamSx3("C5_TRANSP"	)[1]+2	,/*lPixel*/,{|| (cAliasSC5)->C5_TRANSP		})
+	TRCell():New(oCabec,"A4_NOME"		,"SA4"			,RetTitle("A4_NOME")		,PesqPict("SA4","A4_NOME"	),TamSx3("A4_NOME"  	)[1]+2	,/*lPixel*/,{|| SA4->A4_NOME	        	})
+	TRCell():New(oCabec,"A4_CGC"		,"SA4"			,RetTitle("A4_CGC")		,PesqPict("SA4","A4_CGC"		),nTamCGC						,/*lPixel*/,{|| SA4->A4_CGC		        	})
+
+
+	//-----------------------------------------------------------------------
+	//Criacao da celulas da secao do relatorio
+	//-----------------------------------------------------------------------
+	//TRCell():New
+	//ExpO1 : Objeto TSection que a secao pertence
+	//ExpC2 : Nome da celula do relatório. O SX3 será consultado
+	//ExpC3 : Nome da tabela de referencia da celula
+	//ExpC4 : Titulo da celula 
+	//        Default : X3Titulo()
+	//ExpC5 : Picture
+	//        Default : X3_PICTURE
+	//ExpC6 : Tamanho
+	//        Default : X3_TAMANHO
+	//ExpL7 : Informe se o tamanho esta em pixel
+	//        Default : False
+	//ExpB8 : Bloco de código para impressao.
+	//        Default : ExpC2
+	//-----------------------------------------------------------------------
+
+	oRomaneio := TRSection():New(oReport,"Itens",{"SC5","SC9","SF2","SA1"},/*{Array com as ordens do relatório}*/,/*Campos do SX3*/,/*Campos do SIX*/)
+	oRomaneio:SetTotalInLine(.F.)
+	TRCell():New(oRomaneio,"C5_NUM"		,,"Ped",	PesqPict("SC5","C5_NUM"),		20	,/*lPixel*/,{|| (cAliasSC5)->C5_NUM })
+	TRCell():New(oRomaneio,"A1_NOME"	,,"Nome",	PesqPict("SA1","A1_NOME"),		72	,/*lPixel*/,{|| (cAliasSA1)->A1_NOME })
+	TRCell():New(oRomaneio,"C9_NFISCAL"	,,"NF-Serie",		PesqPict("SC9","C9_NFISCAL"),	28	,/*lPixel*/,{|| Alltrim((cAliasSC9)->C9_NFISCAL)+'-'+Alltrim((cAliasSC9)->C9_SERIENF) })
+	TRCell():New(oRomaneio,"NTOTAL"		,,"Vol"	,	PesqPict("SF2","F2_VOLUME1"),	10	,/*lPixel*/,{|| nTotal },"RIGHT",,"RIGHT")
+	TRCell():New(oRomaneio,"F2_PBRUTO"	,,"Peso Br",PesqPict("SF2","F2_PBRUTO"),	28	,/*lPixel*/,{|| (cAliasSF2)->F2_PBRUTO })
+	IF CEMPANT = "03"
+		TRCell():New(oRomaneio,"C5_NUMOLD"	,,"Ped Portal",PesqPict("SC5","C5_NUMOLD"),	28	,/*lPixel*/,{|| Alltrim((cAliasSC5)->C5_NUMOLD) },"RIGHT",,"RIGHT")
+	ENDIF
+	TRCell():New(oRomaneio,"NTOTLIB"	,,"Vl.Bruto",PesqPict("SF2","F2_VALBRUT"),	26	,/*lPixel*/,{|| nTotLib	},"RIGHT",,"RIGHT")
+
+	TRFunction():New(oRomaneio:Cell("NTOTLIB"	),/* cID */,"SUM",/*oBreak*/,""/*cTitle*/,/*cPicture*/,/*uFormula*/,.T./*lEndSection*/,.F./*lEndReport*/,.F./*lEndPage*/)
+	TRFunction():New(oRomaneio:Cell("F2_PBRUTO"),/* cID */,"SUM",/*oBreak*/,""/*cTitle*/,/*cPicture*/,/*uFormula*/,.T./*lEndSection*/,.F./*lEndReport*/,.F./*lEndPage*/)
+	TRFunction():New(oRomaneio:Cell("NTOTAL"	),/* cID */,"SUM",/*oBreak*/,""/*cTitle*/,"@E 99999"/*cPicture*/,/*uFormula*/,.T./*lEndSection*/,.F./*lEndReport*/,.F./*lEndPage*/)
+
+	//Altera texto dos totalizadores
+	oReport:Section(2):SetTotalText(" T O T A I S ")
+
+Return(oReport)
+
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+?????????????????????????????????????????????????????????????????????????????
+??ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ???
+???Programa  ?ReportPrin? Autor ? Marco Bianchi         ? Data ? 21/07/06 ???
+???ÄÄÄÄÄÄÄÄÄÄ?ÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´??
+???Descri??o ?A funcao estatica ReportDef devera ser criada para todos os ???
+???          ?relatorios que poderao ser agendados pelo usuario.          ???
+???          ?                                                            ???
+???ÄÄÄÄÄÄÄÄÄÄ?ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´??
+???Retorno   ?Nenhum                                                      ???
+???ÄÄÄÄÄÄÄÄÄÄ?ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´??
+???Parametros?ExpO1: Objeto Report do Relatório                           ???
+???          ?                                                            ???
+???ÄÄÄÄÄÄÄÄÄÄ?ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´??
+???   DATA   ? Programador   ?Manutencao efetuada                         ???
+???ÄÄÄÄÄÄÄÄÄÄ?ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ?ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´??
+???          ?               ?                                            ???
+???ÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ???
+?????????????????????????????????????????????????????????????????????????????
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function ReportPrint(oReport,cAliasSC9,cAliasSC5,cAliasSF2,cALiasSB1,cAliasSA1,cAliasSC6)
+
+	Local lFirst   := .T.
+	Local cPedAnt  := "   "
+	Local _cArq    := ""
+	Local cTransportadora := ""
+	Local cNotaFiscal     := ""
+	Local cImpRodape      := "NAO"
+	Local dDtEmbarque := CTOD("  /  /  ") 
+	
+	//Funç?o que permite ao usuario marcar Nfs a imprimir no romaneio
+	_cArq := u_ViewNfs()
+
+	//Define o bloco de codigo que retornara o conteudo de impressao da celula.
+	oReport:Section(2):Cell("NTOTLIB" ):SetBlock({|| nTotLib  })
+	oReport:Section(2):Cell("F2_PBRUTO" ):SetBlock({|| nTotPsB  })
+	oReport:Section(2):Cell("NTOTAL"  ):SetBlock({|| nTotal   })
+
+	//Transforma parametros Range em expressao SQL
+	MakeSqlExpr(oReport:uParam)
+
+	//Filtragem do relatório
+	dbSelectArea("SC9")
+	dbSetOrder(1)
+
+	//Query do relatório da secao 1
+	oReport:Section(2):BeginQuery()
+	BeginSql Alias cAliasSC9
+		SELECT DISTINCT
+		C9_FILIAL,
+		C9_PEDIDO,
+		C9_NFISCAL,
+		C9_SERIENF,
+		C9_CLIENTE,
+		C9_LOJA,
+		C5_NUM,
+		C5_CLIENTE,
+		C5_LOJACLI,
+		C5_NUMOLD,
+		C5_TRANSP,
+		F2_VOLUME1,
+		F2_PLIQUI,
+		F2_PBRUTO,
+		F2_VALBRUT,
+		F2_TRANSP,
+		F2_DOC,
+		F2_SERIE,
+		C6_GRADE,
+		C9_BLEST,
+		C9_BLCRED,
+		(
+	CASE WHEN C5_TIPO IN ('D','B') THEN
+		LEFT(SA2.A2_NOME,30)
+	ELSE
+		LEFT(SA1.A1_NOME,30) END
+		) AS A1_NOME
+
+		FROM
+		%Table:SC9% SC9
+		INNER JOIN %Table:SC5% SC5 ON
+		SC5.C5_FILIAL = %xFilial:SC5% AND
+		SC5.C5_NUM = SC9.C9_PEDIDO AND
+		SC5.D_E_L_E_T_= ' '
+
+		INNER JOIN %Table:SF2% SF2 ON
+		SF2.F2_FILIAL = %xFilial:SF2% AND
+		SF2.F2_DOC = SC9.C9_NFISCAL AND
+		SF2.F2_SERIE = SC9.C9_SERIENF AND
+		SF2.F2_CLIENTE = SC9.C9_CLIENTE AND
+		SF2.F2_LOJA = SC9.C9_LOJA AND
+		SF2.F2_EMISSAO BETWEEN %Exp:DtoS(mv_par03)% AND %Exp:DtoS(mv_par04)% AND
+		SF2.D_E_L_E_T_= ' '
+
+		INNER JOIN %Table:SC6% SC6 ON
+		SC6.C6_FILIAL = %xFilial:SC6% AND
+		SC6.C6_NUM = SC9.C9_PEDIDO AND
+		SC6.C6_PRODUTO = SC9.C9_PRODUTO AND
+		SC6.C6_ITEM = SC9.C9_ITEM AND
+		SC6.D_E_L_E_T_= ' '
+
+		LEFT JOIN %Table:SB1% SB1 ON
+		SB1.B1_COD = SC9.C9_PRODUTO AND
+		SB1.B1_FILIAL = %xFilial:SB1% AND
+		SB1.D_E_L_E_T_= ' '
+
+		LEFT OUTER JOIN %Table:SA1% SA1 ON
+		SA1.A1_COD = SC9.C9_CLIENTE AND
+		SA1.A1_LOJA = SC9.C9_LOJA AND
+		SA1.A1_FILIAL = %xFilial:SA1% AND
+		SA1.D_E_L_E_T_= ' '
+
+		LEFT OUTER JOIN %Table:SA2% SA2 ON
+		SA2.A2_COD = SC9.C9_CLIENTE AND
+		SA2.A2_LOJA = SC9.C9_LOJA AND
+		SA2.A2_FILIAL = %xFilial:SA2% AND
+		SA2.D_E_L_E_T_= ' '
+
+		WHERE
+		SC9.C9_FILIAL = %xFilial:SC9% AND
+		SC9.C9_PEDIDO BETWEEN %Exp:mv_par01% AND %Exp:mv_par02% AND
+		(SC9.C9_BLEST = ' ' OR SC9.C9_BLEST = '10') AND
+		(SC9.C9_BLCRED = ' ' OR SC9.C9_BLCRED = '10') AND
+		SC9.D_E_L_E_T_= ' '
+
+		ORDER BY
+		SF2.F2_TRANSP,
+		SC9.C9_NFISCAL,
+		SC9.C9_SERIENF,
+		SC5.C5_CLIENTE,
+		SC5.C5_LOJACLI
+
+	EndSql
+
+	oReport:Section(2):EndQuery(/*Array com os parametros do tipo Range*/)
+
+	//Inicio da impressao do fluxo do relatório
+	oReport:SetTitle(oReport:Title() + " - " + GetMv("MV_MOEDA" + STR(mv_par07,1)) )	// "Curva ABC de Estoque - Ordem de "###" / % de Participacao"
+	oReport:SetMeter((cAliasSC9)->(LastRec()))
+
+	While !oReport:Cancel() .And. !(cAliasSC9)->(Eof()) .And. (cAliasSC9)->C9_FILIAL = xFilial("SC9")
+
+		If !TRB2->(DbSeek( (cAliasSC9)->C9_NFISCAL+(cAliasSC9)->C9_SERIENF+(cAliasSC9)->C9_CLIENTE+(cAliasSC9)->C9_LOJA ))
+			dbSelectArea(cAliasSC9)
+			dbSkip()
+			Loop
+		Endif
+		If Empty( TRB2->ZA4_OK )
+			dbSelectArea(cAliasSC9)
+			dbSkip()
+			Loop
+		Endif
+
+		If cTransportadora != (cAliasSC9)->F2_TRANSP
+			cTransportadora := (cAliasSC9)->F2_TRANSP
+
+			cPedAnt := C9_PEDIDO
+			nTotLib := 0
+			nTotPsB := 0
+			nTotal  := 0
+			cPedido := (cAliasSC5)->C5_NUM
+
+			dbSelectArea("SA4")
+			dbSeek(xFilial()+(cAliasSC9)->F2_TRANSP)
+
+			If lfirst
+				oReport:EndPage() //-- Salta Pagina
+			EndIf
+
+			lFirst := .F.
+
+			oReport:Section(1):Init()
+			oReport:Section(1):PrintLine()
+			oReport:Section(1):Finish()
+
+			oReport:Section(2):Init()
+
+		Endif
+
+		//Inclusao de printline para imprimir o cliente, nota fiscal e outros dados.
+		If (cAliasSC9)->C9_NFISCAL + (cAliasSC9)->C9_SERIENF + (cAliasSC9)->C9_CLIENTE + (cAliasSC9)->C9_LOJA != cNotaFiscal
+			cNotaFiscal 	:= (cAliasSC9)->C9_NFISCAL + (cAliasSC9)->C9_SERIENF + (cAliasSC9)->C9_CLIENTE + (cAliasSC9)->C9_LOJA
+			nTotLib     	:= (cAliasSF2)->F2_VALBRUT
+			nTotPsB 		:= (cAliasSF2)->F2_PBRUTO
+			nTotal      	:= (cAliasSF2)->F2_VOLUME1
+			oReport:Section(2):PrintLine()
+		Endif
+
+		ImpItemR4(oReport,cAliasSC9,cAliasSC6,cAliasSB1)
+
+		If VALTYPE(MV_PAR12) = "N"
+			If MV_PAR12 = 1 // SIM ATUALIZA A DATA DE EMBARQUE
+				CB7->(DbSetOrder(4))
+				If CB7->(DBSeek( xFilial("CB7") + (cAliasSC9)->C9_NFISCAL + (cAliasSC9)->C9_SERIENF))
+					If Empty(CB7->CB7_DTEMBA)
+						CB7->(RecLock("CB7",.F.))
+						CB7->CB7_DTEMBA := dDataBase
+						CB7->(MsUnlock())
+			
+						SF2->(DbSetOrder(1))
+						If SF2->(DbSeek(xFilial("SF2") + (cAliasSC9)->C9_NFISCAL + (cAliasSC9)->C9_SERIENF))
+							SF2->(RecLock("SF2", .F.))
+							SF2->F2_DTEMB := dDataBase
+							SF2->(MsUnLock())
+							dDtEmbarque := dDataBase
+						EndIf
+					Else
+						dDtEmbarque := CB7->CB7_DTEMBA
+					EndIf
+				EndIf
+			EndIf
+		EndIf
+				
+		dbSelectArea(cAliasSC9)
+		dbSkip()
+		oReport:IncMeter()
+		cImpRodape := "NAO"
+		If cTransportadora != (cAliasSC9)->F2_TRANSP .or. Eof()
+			cImpRodape := "SIM"
+			oReport:Section(2):Finish()
+			oReport:SkipLine(1)
+			oReport:SkipLine(1)
+			oReport:PrintText("Placa do veiculo: ________________________________________         Data: __________/__________/__________")
+			oReport:SkipLine(1)
+			oReport:SkipLine(1)
+			oReport:SkipLine(1)
+			oReport:PrintText("Nome legível: ___________________________________________________________________________________")
+			oReport:SkipLine(1)
+			oReport:SkipLine(1)
+			oReport:SkipLine(1)
+			oReport:PrintText("R.G.: _____________________________________")
+			oReport:SkipLine(1)
+			If .NOT. EMPTY(dDtEmbarque) 
+				oReport:PrintText("OBS. TAIFF: DT. EMBARQUE " + DTOC(dDtEmbarque))
+				oReport:SkipLine(1)
+			EndIf
+
+			//Um Pedido por Folha
+			If mv_par08 == 1
+				oReport:Section(1):SetPageBreak(.T.)
+			EndIf
+		EndIf
+	EndDo
+
+	If cImpRodape = "NAO"
+		oReport:Section(2):Finish()
+		oReport:SkipLine(1)
+		oReport:SkipLine(1)
+		oReport:PrintText("Placa do veiculo: ________________________________________         Data: __________/__________/__________")
+		oReport:SkipLine(1)
+		oReport:SkipLine(1)
+		oReport:SkipLine(1)
+		oReport:PrintText("Nome legível: ___________________________________________________________________________________")
+		oReport:SkipLine(1)
+		oReport:SkipLine(1)
+		oReport:SkipLine(1)
+		oReport:PrintText("R.G.: _____________________________________")
+		oReport:SkipLine(1)
+		If .NOT. EMPTY(dDtEmbarque) 
+			oReport:PrintText("OBS. TAIFF: DT. EMBARQUE " + DTOC(dDtEmbarque))
+			oReport:SkipLine(1)
+		EndIf
+	Endif
+	oReport:Section(2):SetPageBreak(.T.)
+	If VALTYPE(MV_PAR12) = "N"
+		If MV_PAR12 = 1 
+			//Funç?o que atualiza a data de embarque na OS
+			U_EMBARQ790()
+		EndIf
+	EndIf
+
+	If Select("TRB2") > 0
+		TRB2->(DbCloseArea())
+		Ferase( _cArq + ".DBF")
+	Endif
+
+Return
+
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+?????????????????????????????????????????????????????????????????????????????
+??ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ???
+???Fun??o    ?ImpItemR4 ? Autor ? Marco Bianchi         ? Data ? 24/07/06 ???
+???ÄÄÄÄÄÄÄÄÄÄ?ÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´??
+???Descri??o ? Impressao de Itens do Romaneio  de Despacho                ???
+???          ? Ordem de Impressao : LOCALIZACAO NO ALMOXARIFADO           ???
+???ÄÄÄÄÄÄÄÄÄÄ?ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´??
+???Sintaxe   ? ImpItem(void)                                              ???
+???ÄÄÄÄÄÄÄÄÄÄ?ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´??
+??? Uso      ? MatR790                                                    ???
+???ÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ???
+?????????????????????????????????????????????????????????????????????????????
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function ImpItemR4(oReport,cAliasSC9,cAliasSC6,cAliasSB1)
+
+	Local cMascara :=GetMv("MV_MASCGRD")   //Passou aqui
+	Local nTamRef  :=Val(Substr(cMascara,1,2))
+
+	IF (cAliasSC6)->C6_GRADE == "S" .And. MV_PAR06 == 1
+		dbSelectArea(cAliasSC9)
+		cProdRef:=Substr(C9_PRODUTO,1,nTamRef)
+		cPedido := (cAliasSC9)->C9_PEDIDO
+		nReg    := 0
+
+		While !oReport:Cancel() .And. !Eof() .And. xFilial() == C9_FILIAL .And. Substr(C9_PRODUTO,1,nTamRef) == cProdRef;
+				.And. C9_PEDIDO == cPedido
+			nReg:=Recno()
+
+			#IFNDEF TOP
+				If !Empty(C9_BLEST) .AND. !Empty(C9_BLCRED) .And. C9_BLEST # "10" .AND. C9_BLCRED # "10"
+					dbSkip()
+					Loop
+				Endif
+			#ENDIF
+
+			//Valida o produto conforme a mascara
+			lRet:=ValidMasc((cAliasSC9)->C9_PRODUTO,MV_PAR05)
+			If !lRet
+				dbSkip()
+				Loop
+			Endif
+
+			dbSelectArea(cAliasSC9)
+			dbSkip()
+		End
+
+		If nReg > 0
+			dbGoto(nReg)
+			nReg:=0
+		Endif
+
+	Endif
+
+	// Bloqueado para nao imprimir o rodape finalizador
+	// oReport:Section(2):PrintLine()
+	dbSelectArea(cAliasSC9)
+
+Return
+
+
+// Funç?o que permite ao usuario marcar NFs a imprimir no romaneio
+User Function ViewNfs()
+
+	Local	aCampos 	  := {}
+	Private cCadastro := "Selecione as Notas Fiscais para impressao no Romaneio"
+	Private aRotina   := { }
+
+	CQUERY := "SELECT DISTINCT "
+	CQUERY += "'  ' AS ZA4_OK, "
+	CQUERY += "F2_DOC, "
+	CQUERY += "F2_SERIE, "
+	CQUERY += "F2_LOJA, "
+	CQUERY += "CONVERT(char(12), CONVERT(DATETIME,F2_EMISSAO), 103) AS F2_EMISSAO, "
+	CQUERY += "( "
+	CQUERY += "CASE WHEN "
+	CQUERY += "( "
+	CQUERY += "SELECT "
+	CQUERY += "TMPC5.C5_TIPO "
+	CQUERY += "FROM "
+	CQUERY += "SC5010 TMPC5 "
+	CQUERY += "WHERE "
+	CQUERY += "TMPC5.C5_NUM = SC9.C9_PEDIDO AND "
+	CQUERY += "TMPC5.D_E_L_E_T_!='*' AND "
+	CQUERY += "TMPC5.C5_FILIAL='" + XFILIAL("SC5") + "' "
+	CQUERY += ") IN ('D','B') THEN "
+	CQUERY += "LEFT(FRN.A2_NOME,50) "
+	CQUERY += "ELSE "
+	CQUERY += "LEFT(CLI.A1_NOME,50) END "
+	CQUERY += ") AS CLIENTE, "
+	CQUERY += "F2_CLIENTE, "
+	CQUERY += "F2_LOJA , "
+	CQUERY += "F2_TRANSP , "
+	CQUERY += "C9_ORDSEP, "
+	CQUERY += "C9_XITEM, "
+	CQUERY += "( "
+	CQUERY += "SELECT "
+	CQUERY += "C5_TIPO "
+	CQUERY += "FROM "
+	CQUERY += "SC5030 TMSC5 "
+	CQUERY += "WHERE "
+	CQUERY += "TMSC5.C5_NUM = SC9.C9_PEDIDO AND "
+	CQUERY += "TMSC5.D_E_L_E_T_!='*' AND "
+	CQUERY += "TMSC5.C5_FILIAL='" + XFILIAL("SC5") + "' "
+	CQUERY += ") AS C5_TIPO "
+	CQUERY += "FROM "
+	CQUERY += RetSqlName("SF2") + " SF2 (NOLOCK) "
+	CQUERY += "INNER JOIN " + RetSqlName("SC9") + " SC9 (NOLOCK) ON "
+	CQUERY += "SC9.C9_FILIAL  = " + XFILIAL("SC9") + " AND "
+	CQUERY += "SC9.C9_NFISCAL = SF2.F2_DOC AND "
+	CQUERY += "SC9.C9_SERIENF = SF2.F2_SERIE AND "
+	CQUERY += "SC9.C9_CLIENTE = SF2.F2_CLIENTE AND "
+	CQUERY += "SC9.C9_LOJA = SF2.F2_LOJA AND "
+	CQUERY += "SC9.D_E_L_E_T_ = '' "
+	CQUERY += "LEFT OUTER JOIN " + RetSqlName("SA1") + " CLI (NOLOCK) ON "
+	CQUERY += "CLI.A1_FILIAL = '" + XFILIAL("SA1") + "' AND "
+	CQUERY += "CLI.A1_COD = SF2.F2_CLIENTE AND "
+	CQUERY += "CLI.A1_LOJA = SF2.F2_LOJA AND "
+	CQUERY += "CLI.D_E_L_E_T_ = '' "
+	CQUERY += "LEFT OUTER JOIN " + RetSqlName("SA2") + " FRN (NOLOCK) ON "
+	CQUERY += "FRN.A2_FILIAL = '" + XFILIAL("SA2") + "' AND "
+	CQUERY += "FRN.A2_COD = SF2.F2_CLIENTE AND "
+	CQUERY += "FRN.A2_LOJA = SF2.F2_LOJA AND "
+	CQUERY += "FRN.D_E_L_E_T_ = '' "
+	CQUERY += "WHERE "
+	CQUERY += "SF2.F2_FILIAL = '" + XFILIAL("SF2") + "' AND "
+	CQUERY += "SF2.F2_EMISSAO BETWEEN '" + DTOS(MV_PAR03) + "' AND '" + DTOS(MV_PAR04) + "' AND "
+	CQUERY += "SF2.F2_DOC BETWEEN '" + ALLTRIM(MV_PAR09) + "' AND '" + ALLTRIM(MV_PAR10) + "' AND "
+	IF !EMPTY( ALLTRIM(MV_PAR11) )
+		CQUERY += "SF2.F2_TRANSP = '" + ALLTRIM(MV_PAR11) + "' AND "
+	ENDIF
+	CQUERY += "SF2.D_E_L_E_T_ != '*' "
+	CQUERY += "ORDER BY "
+	CQUERY += "F2_DOC"
+	
+	//MEMOWRITE("MATR790T_LISTA_NFS.SQL",CQUERY)
+	
+	cIndTRB := "F2_DOC + F2_SERIE + F2_CLIENTE + F2_LOJA"
+
+	If Select("TRB") > 0
+		TRB->(DbCloseArea())
+	Endif
+	If Select("TRB2") > 0
+		TRB2->(DbCloseArea())
+	Endif
+
+	TcQuery cQuery NEW ALIAS ("TRB")
+
+	DbSelectArea("TRB")
+
+	cArq := CriaTrab(NIL,.F.)
+	Copy To &cArq
+
+	dbUseArea(.T.,,cArq,"TRB2",.F.)
+
+	IndRegua( "TRB2", cArq, cIndTRB )
+	dbSetOrder(1)
+
+	DbSelectArea("TRB2")
+	TRB2->(DBGotop())
+
+	AADD(aCampos, {"ZA4_OK"    , NIL ,"Ok"  })
+	AADD(aCampos, {"F2_DOC"    , NIL ,"Nro. da NF"})
+	AADD(aCampos, {"F2_SERIE"  , NIL ,"Serie"})
+	AADD(aCampos, {"C5_TIPO"   , NIL ,"Tipo Ped"})
+	AADD(aCampos, {"CLIENTE"   , NIL ,"Cliente"})
+	AADD(aCampos, {"F2_LOJA"   , NIL ,"Loja"})
+	AADD(aCampos, {"F2_EMISSAO", NIL ,"Emissao"})
+
+	cMarca := GetMark()
+
+	MARKBROW("TRB2","ZA4_OK",,aCampos,,cMarca,'U_MarcaAll()',,,,'U_Marca()')
+
+Return (cArq)
+
+
+//Funç?o marca/desmarca individual
+User Function Marca()
+	If IsMark('ZA4_OK',cMarca)
+		RecLock('TRB2',.F.)
+		Replace ZA4_OK With Space(2)
+		MsUnLock()
+	Else
+		RecLock('TRB2',.F.)
+		Replace ZA4_OK With cMarca
+		MsUnLock()
+	EndIf
+Return
+
+
+//Funç?o marca/desmarca todos
+User Function MarcaTodos()
+	Local nRecno:=Recno()
+	dbSelectArea('TRB2')
+	ProcRegua(RecCount()) // Numero de registros a processar
+	dbGotop()
+	While !Eof()
+		IncProc()
+		u_Marca()
+		dbSkip()
+	End
+	dbGoto(nRecno)
+Return
+
+
+//Funç?o de progresso marcadora de registros
+User Function MarcaAll()
+	Processa({|| U_MarcaTodos() },"Processando...")
+Return NIL
+
+
+//Funç?o que atualiza a data de embarque na OS
+User Function EMBARQ790()
+	Local cNota := ""
+	Local cSerie:= ""
+	Local cTransp := ""
+	Local _lStatusFaseII := GetNewPar("MV_ARMCEN",.F.)
+
+	LOCAL CORDSEP := ""
+	LOCAL CC9XITEM:= ""
+
+	cTransp := GetMV("TF_TRPAUT")
+
+	TRB2->(DbGotop())
+	While !TRB2->(Eof())
+		If !Empty( TRB2->ZA4_OK )
+			cNota := TRB2->F2_DOC
+			cSerie:= TRB2->F2_SERIE
+			CORDSEP	:= TRB2->C9_ORDSEP
+			CC9XITEM:= TRB2->C9_XITEM // QUANDO 1 S?O OS PRODUTOS TAIFF
+
+			DbSelectArea("CB7")
+			CB7->(DbSetOrder(4))
+			CB7->(DBSeek( xFilial("CB7") + cNota + cSerie , .T. ))
+			While CB7->(CB7_FILIAL+CB7_NOTA+CB7_SERIE) = xFilial("CB7") + cNota + cSerie .AND. !CB7->(Eof())
+				If CB7->CB7_STATUS = '9' .and. Empty(CB7->CB7_DTEMBA) .AND. CB7->(CB7_CLIENT+CB7_LOJA) = TRB2->(F2_CLIENTE+F2_LOJA)
+					CB7->(RecLock("CB7",.f.))
+					CB7->CB7_DTEMBA := dDataBase
+					CB7->(MsUnlock())
+
+					//MJL ini 14/6/2011 solicitacao DELTA
+					SF2->(DbSetOrder(1))
+					If SF2->(DbSeek(xFilial("SF2") + CB7->(CB7_NOTA + CB7_SERIE), .F.))
+						SF2->(RecLock("SF2", .F.))
+						SF2->F2_DTEMB := CB7->CB7_DTEMBA
+						// 16/07/2012 - Incluido por Rodrigo Brito
+						If SF2->F2_TRANSP$cTransp .Or. SF2->F2_TPFRETE == "F"
+							SF2->F2_DTRECEB := CB7->CB7_DTEMBA
+						Endif
+						// Fim 16/07/2012					
+						SF2->(MsUnLock())
+					EndIf
+					//MJL fim 14/6/2011
+				EndIf
+				CB7->(DbSkip())
+			End
+			/*
+			A partir da ativaç?o do projeto Cross Docking na filial Matriz o registro da data de embarque deixou de ser atrelado ? ordem de separaç?o
+			Em Guarulhos n?o haverá operaç?o pelo coletor de dados.
+			Data: 19/05/2015 Autor: CT
+			*/
+			If CEMPANT='03' .AND. CFILANT='01' .and. _lStatusFaseII
+				SF2->(DbSetOrder(1))
+				If SF2->(DbSeek(xFilial("SF2") + TRB2->(F2_DOC+F2_SERIE+F2_CLIENTE+F2_LOJA), .F.))
+					SF2->(RecLock("SF2", .F.))
+					SF2->F2_DTEMB := SF2->F2_EMISSAO // dDataBase
+					SF2->(MsUnLock())
+				EndIf
+			EndIf
+			/*
+			Implementado no romaneio a data de embarque para toda NF quando tipo unidade de negocio 
+			for da PROART
+			Autor: CT em 14/02/2014
+			*/
+			SD2->(DbSetOrder(3))
+			If SD2->(DbSeek(xFilial("SD2") + TRB2->(F2_DOC+F2_SERIE+F2_CLIENTE+F2_LOJA) , .F.))
+				If Alltrim(SD2->D2_ITEMCC) ="PROART"
+					SF2->(DbSetOrder(1))
+					If SF2->(DbSeek(xFilial("SF2") + TRB2->(F2_DOC+F2_SERIE+F2_CLIENTE+F2_LOJA), .F.))
+						SF2->(RecLock("SF2", .F.))
+						SF2->F2_DTEMB := dDataBase
+						If SF2->F2_TRANSP$cTransp .Or. SF2->F2_TPFRETE == "F"
+							SF2->F2_DTRECEB := dDataBase
+						Endif
+						SF2->(MsUnLock())
+					EndIf
+				EndIf
+			EndIf
+			/*	Fim	14/02/2014 		*/
+
+
+			/*
+			Implementado no romaneio a data de embarque para toda NF quando tipo unidade de negocio for da TAIFF
+			Autor: CT em 09/06/2020
+			*/
+			IF CC9XITEM = "1"
+				DbSelectArea("CB7")
+				CB7->(DbSetOrder(1))
+				CB7->(DBSeek( xFilial("CB7") + CORDSEP , .T. ))
+				While CB7->CB7_FILIAL = xFilial("CB7") .AND. CB7->CB7_ORDSEP=CORDSEP .AND. !CB7->(Eof()) 
+					If CB7->CB7_STATUS = '9' .and. Empty(CB7->CB7_DTEMBA)
+						CB7->(RecLock("CB7",.f.))
+						CB7->CB7_DTEMBA := dDataBase
+						CB7->(MsUnlock())
+
+						SF2->(DbSetOrder(1))
+						If SF2->(DbSeek(xFilial("SF2") + TRB2->F2_DOC + TRB2->F2_SERIE + TRB2->F2_CLIENTE + TRB2->F2_LOJA, .F.))
+							SF2->(RecLock("SF2", .F.))
+							SF2->F2_DTEMB := dDataBase
+							If SF2->F2_TRANSP$cTransp .Or. SF2->F2_TPFRETE == "F"
+								SF2->F2_DTRECEB := dDataBase
+							Endif
+							SF2->(MsUnLock())
+						EndIf
+					EndIf
+					CB7->(DbSkip())
+				End
+			ENDIF
+		EndIf
+		TRB2->(DbSkip())
+	End
+Return NIL

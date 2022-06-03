@@ -1,0 +1,313 @@
+/*
+Padrao Zebra
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณIMG02     บAutor  ณSandro Valex        บ Data ณ  19/06/01   บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณPonto de entrada referente a imagem de identificacao da     บฑฑ
+ฑฑบ          ณendereco                                                    บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณ AP5                                                        บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+User Function Img02 // imagem de etiqueta de ENDERECO
+
+Local cCodigo
+Local cCodID := paramixb[1]
+Local _cCodBarra := ""
+Local _cLinguagem := "ZPL"
+Local _cEndLine   := CHR(13)+CHR(10)
+Local _sComando   := ""
+Local _cDestino   := "C:\ETIQ_EPL.TXT"
+Local _cArquivoBat:= "C:\ETIQUETA.BAT"
+
+Private cString := ""
+Private cPorta  := "LPT1"
+
+If CB5->CB5_LPT != "0"
+   _cPorta := "LPT" + Alltrim( CB5->CB5_LPT )
+Else
+   _cPorta := "COM" + Alltrim( CB5->CB5_PORTA )
+Endif
+
+If CB5->CB5_LPT != "0"
+	PrinterWin(.F.) 						// Impressao Dos/Windows
+	PreparePrint(.F.,"",.F.,_cPorta) 		// Prepara a impressao na porta especIficada
+	InitPrint(1)
+Else
+	nHdll := 0
+	MsOpenPort(nHdll,_cPorta + ":9600,n,8,1")
+EndIf
+
+
+
+If cCodID # NIL
+	cCodigo    := cCodID
+	_cCodBarra := cCodID
+ElseIf Empty(SBE->BE_IDETIQ)
+	If Usacb0('02')
+		cCodigo    := CBGrvEti('02',{SBE->BE_LOCALIZ,SBE->BE_LOCAL})
+		_cCodBarra := cCodigo
+		RecLock("SBE",.F.)
+		SBE->BE_IDETIQ := cCodigo
+		MsUnlock()
+	Else
+		cCodigo    := SBE->(BE_LOCAL+" "+BE_LOCALIZ)
+    	_cCodBarra := SBE->(BE_LOCAL+BE_LOCALIZ)
+	EndIf
+Else
+	If Usacb0('02')
+		cCodigo    := SBE->BE_IDETIQ
+		_cCodBarra := SBE->BE_IDETIQ
+	Else
+		cCodigo    := SBE->(BE_LOCAL+" "+BE_LOCALIZ)
+		_cCodBarra := SBE->(BE_LOCAL+BE_LOCALIZ)
+	EndIf
+Endif
+cCodigo := Alltrim(cCodigo)
+// ja estava bloqueado //MSCBLOADGRF("SIGA.GRF")
+// MSCBBEGIN(1,6)
+// MSCBBOX(30,05,76,05)
+// MSCBBOX(02,12.7,76,12.7)
+// MSCBBOX(02,21,76,21)
+// MSCBBOX(30,01,30,12.7,3)
+// ja estava bloqueado //MSCBGRAFIC(2,3,"SIGA")
+// MSCBSAY(33,02,'ENDERECO',"N","0","025,035",,,,,.t.)
+// MSCBSAY(33,06,"CODIGO","N","A","012,008")
+// MSCBSAY(33,08, AllTrim(SBE->BE_LOCALIZ), "N", "0", "032,035")
+// MSCBSAY(05,14,"DESCRICAO","N","A","012,008")
+// MSCBSAY(05,17,SBE->BE_DESCRIC,"N", "0", "020,030")
+// MSCBSAYBAR(23,22,cCodigo,"N","MB07",8.36,.F.,.T.,.F.,,2,1,.F.,.F.,"1",.T.)
+// MSCBInfoEti("Endereco","30X100")
+// CONOUT(MSCBEND())
+
+If _cLinguagem="ZPL" .or. CB5->CB5_MODELO = "Z4M" .or. CB5->CB5_MODELO = "ZEBRA"
+   
+   InicEtiq(1100,2000)			
+
+   ImpPortSel("^FO650,100^A0R,145,105^FH_^FD" + AllTrim(SBE->BE_LOCAL) + " - " + AllTrim(SBE->BE_LOCALIZ)+"^FS")						
+   ImpPortSel("^FO500,000^GB000,800,05^FS")                                         
+   ImpPortSel("^FO450,16^A0R,035,035^FH_^FDDESCRICAO^FS")						
+   ImpPortSel("^FO400,16^A0R,045,035^FH_^FD"+SBE->BE_DESCRIC+"^FS")			
+   ImpPortSel("^FO350,000^GB000,800,05^FS")                                    
+   ImpPortSel("^FO200,080^BY3,1,100^BCR,100,N,N,N,A^FD" + _cCodBarra + "^FS")  
+   ImpPortSel("^FO100,250^A0R,60,55^FD" + cCodigo + "^FS")
+
+   FimEtiq(1)			
+   
+ElseIf _cLinguagem="EPL"
+   
+   IF 1=2 // Funcionalidade desativada, permanece apenas com alerta.
+      //
+      // TESTE COM FUNวรO PADRรO DO ADVPL, A IMPRESSAO DE TEXTO FUNCIONA AO UTILIZAR CODIGO DE BARRA NAO IMPRIME NADA
+      //                              
+      MSCBPRINTER("TLP 2844",cPorta,,)
+      MSCBCHKStatus(.T.) // Checa o Status da impressora sem ribbon ou sem papel
+      MSCBINFOETI("Exemplo 1","MODELO 1")
+      MSCBBEGIN(1,8,25.307) //Etiqueta -> Qtde, Largura, Altura
+      MSCBBEGIN(1,8,140.000) //Etiqueta -> Qtde, Largura, Altura
+
+      // no ultimo parametro tive problemas. observe qque "1,1" ้ string. 
+      // e nao 2 paramentos numericos. ai vc define a proporcao da fonte.
+      MSCBLineV(01,10,80,3,"B")
+      MSCBLineH(01,10,80,3,"B")
+      MSCBSAY(020,20,AllTrim(SBE->BE_LOCAL) + ' - '+ AllTrim(SBE->BE_LOCALIZ),"R", "4", "1,1", .T. )
+      MSCBSAY(020,20,"TESTE","N", "4", "1,1", .T. )
+      MSCBSAY(690,20,AllTrim(SBE->BE_LOCAL) + ' - '+ AllTrim(SBE->BE_LOCALIZ),"R", "4", "2,2", )
+      MSCBSAYBAR(040,24,AllTrim(_cCodBarra),"R",'C',8.36,.F.,.T.,.F.,,2,1,.F.,.F.,"1",.T.)
+      MSCBSAYBAR(20,22,AllTrim(_cCodBarra),"R","C",13)
+   
+      MSCBEND()
+      MSCBCLOSEPRINTER()       
+   eNDIF
+   IF 1=2
+       MSCBPRINTER("ELTRON","LPT1",,)
+       MSCBBEGIN (2,3)
+       MSCBBOX(01,01,75,41,2) 
+       MSCBGRAFIC(3,33,"teste")
+       MSCBLineH(14,31.7,31,35)
+       MSCBSAY(16,36," MICROSIGA","N","1","1,2")
+       MSCBSAY(16,33.5,"SOFTWARE S/A","N","1","1,2")
+       MSCBLineH(1.6,31,74.4)
+       MSCBSAY(35,38,"Codigo Interno","N","9","1,1")
+       MSCBSAY(35,35, AllTrim(SBE->BE_LOCAL) + ' - '+ AllTrim(SBE->BE_LOCALIZ),"N","2","1,1")
+       MSCBSAY(3,28,"Descricao","N","9","1,1")
+       MSCBSAY(3,22,AllTrim(SBE->BE_LOCAL) + ' - '+ AllTrim(SBE->BE_LOCALIZ),"N","2","1,1")
+       MSCBLineH(1.6,20,74.4)
+       MSCBSAYBAR (15,05,AllTrim(_cCodBarra),"N","1",11,,.T.,,,3,2,.f.,.t.,,)  
+       MSCBEND()
+       MSCBCLOSPRINTER()
+   ENDIF
+   
+   IF 1=2 // Funcionalidade desativada, permanece apenas com alerta.
+      //
+      //TESTE COM FUNวีES CRIADAS PELO RICHARD NAHAS PARA A LINGUAGEM ZPL, NAO FUNCIONAM NA IMPRESSORA TLP 2844
+      //
+      ImpPortSel('N' )
+      ImpPortSel('q700' )
+      ImpPortSel('A690,20,1,5,2,2,N,"' + AllTrim(SBE->BE_LOCAL) + ' - '+ AllTrim(SBE->BE_LOCALIZ) + '"' )
+      ImpPortSel('LO460,20,5,1000' )
+      ImpPortSel('A430,20,1,3,2,1,N,"DESCRICAO"' )
+      ImpPortSel('A380,40,1,3,2,2,N,"'+SBE->BE_DESCRIC+'"' )			
+      ImpPortSel('LO320,20,5,1000' )                                    
+      ImpPortSel('B250,20,1,1,5,7,100,N,' + _cCodBarra )  
+      ImpPortSel('A80,60,1,3,2,2,N,' + cCodigo )
+      ImpPortSel('P1')
+   ENDIF
+   
+
+   //
+   // CRIA ARQUIVO COM OS COMANDOS PARA IMPRESSORA TLP 2844
+   //
+   //_sComando := chr (13) + chr (10)
+   _sComando := 'N' + _cEndLine // Limpa o buffer da impressora
+   _sComando += 'ZT' + _cEndLine // 'De pe' para a impressora
+   _sComando += 'R0,0' + _cEndLine // Zera coordenadas
+   _sComando += 'q831' + _cEndLine // Densidade / temperatura: de 1 a 15 (default 10)
+   _sComando += 'D14' + _cEndLine // Densidade / temperatura: de 1 a 15 (default 10)
+   _sComando += 'Q1127,024' + _cEndLine // Tamanho da etiq.: altura etq. / altura picote, em dots (1 mm = 8 dots)
+   _sComando += 'A690,20,1,5,2,2,N,"'+ AllTrim(SBE->BE_LOCAL) + ' - '+ AllTrim(SBE->BE_LOCALIZ) +'"'+ _cEndLine
+   _sComando += 'LO460,20,5,1000' + _cEndLine
+   _sComando += 'A430,20,1,3,2,1,N,"DESCRICAO"' + _cEndLine
+   _sComando += 'A380,40,1,3,2,2,N,"'+SBE->BE_DESCRIC+'"' + _cEndLine		
+   _sComando += 'LO320,20,5,1000' + _cEndLine
+   _sComando += 'B250,20,1,1,5,7,100,N,"' + Alltrim(_cCodBarra) + '"' + _cEndLine 
+   _sComando += 'A80,60,1,3,2,2,N,"' + cCodigo + '"' + _cEndLine
+   _sComando += 'P1' + _cEndLine // Imprime o buffer da impressora em uma etiqueta
+   _sComando += 'N' + _cEndLine // Limpa o buffer da impressora
+
+   _nHdl = fcreate("ML_ETQ4.TMP", 0)
+   fwrite (_nHdl, _sComando)
+   fclose (_nHdl)
+   copy file ML_ETQ4.TMP to (alltrim (_cDestino))
+   delete file ML_ETQ4.TMP
+   
+   //
+   // CRIA ARQUIVO BATCH COM INSTRUวรO DE IMPRESSAO DO ARQUIVO COM COMANDOS DA TLP 2844
+   //
+   If Substr(cPorta,1,3) = 'LPT'
+      _sComando := 'TYPE ' + _cDestino + ' > ' + cPorta + _cEndLine
+   ElseIf Substr(cPorta,1,3) = 'COM'
+      _sComando := 'C:\WINDOWS\SYSTEM32\MODE ' + cPorta + ":9600,n,8,1" + _cEndLine
+      _sComando += 'TYPE ' + _cDestino + ' > ' + cPorta + _cEndLine
+   EndIf   
+   _nHdlA = fcreate("ML_ETQ4.TMP", 0)
+   fwrite (_nHdlA, _sComando)
+   fclose (_nHdlA)
+   copy file ML_ETQ4.TMP to (alltrim (_cArquivoBat))
+   delete file ML_ETQ4.TMP
+   
+   //
+   // EXECUTA PROGRAMA BACTH
+   //   
+   WinExec( _cArquivoBat )
+
+Endif
+          
+If cPorta = "LPT1"
+	Ms_Flush()
+Else
+	//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
+	//ณ Fecha a porta serial                                                ณ
+	//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+	MsClosePort(nHdll)
+	nHdll := 0
+	
+Endif
+
+Return .F.
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณImpPortSelบAutor  ณ Richard N. Cabral  บ Data ณ  09/12/09   บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณValidacao de perguntas do SX1                               บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+Static Function ImpPortSel(cTexto)
+
+cString += cTexto
+If cPorta = "LPT1"
+	@ PROW()+1,001 PSAY cTexto 
+Else
+	MsWrite(nHdll,cTexto)
+	Inkey(.01)
+Endif
+
+Return()
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณInicEtiq  บAutor  ณ Richard N. Cabral  บ Data ณ  14/12/09   บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณComandos iniciais impressao de etiqueta padrao Zebra        บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+
+Static Function InicEtiq(nLargura, nAltura)
+
+ImpPortSel("^XA")									// Comeco Etiqueta
+ImpPortSel("^MCY")									// Set Map Clear to Yes
+ImpPortSel("^XZ")									// Fim Etiqueta
+
+ImpPortSel("^XA")									// Comeco Etiqueta
+ImpPortSel("^SS033,084,028,"+strzero(nAltura,3))	// Set Media Sensor - Web, Media, Ribbon, Lenght
+ImpPortSel("^FWN")									// Field Orientation - N-Normal, R-Rotate 90, I-Inverte 180, B-Bottom 270
+ImpPortSel("^CFD,24")								// Change Alphanumeric Default Font f=font,h=height,w=width
+ImpPortSel("^PW"+strzero(nLargura,4))				// Print Width
+ImpPortSel("^LH0,0")								// Set Label Home - To Right, down from top
+ImpPortSel("^CI0")									// Change International font
+ImpPortSel("^PR2")									// Set print rate
+ImpPortSel("^MNY")									// Media Tracking - Y=Non continuos
+ImpPortSel("^MTT")									// Media Type - T=Termal Transfer Media
+ImpPortSel("^MMT")									// Print Mode - T=Tear Off
+ImpPortSel("^MD0")									// Media Darkness Adjust -30 a 30
+ImpPortSel("^PON")									// Print Orientation N=Normal, I=Inverte
+ImpPortSel("^PMN")									// Print Mirror N=No, Y=Yes
+ImpPortSel("^LRN")									// Label Reverse N=No, Y=Yes
+ImpPortSel("^XZ")									// Fim Etiqueta
+
+ImpPortSel("^XA")									// Comeco Etiqueta
+ImpPortSel("^MCY")									// Set Map Clear to Yes
+ImpPortSel("^XZ")									// Fim Etiqueta
+
+ImpPortSel("^XA")									// Comeco Etiqueta
+ImpPortSel("^DFR:TEMP_FMT.ZPL")						// Download format
+
+Return(.T.)
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณFimEtiq   บAutor  ณ Richard N. Cabral  บ Data ณ  14/12/09   บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณComandos finais impressao de etiqueta padrao Zebra          บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+Static Function FimEtiq(nQtde)
+
+ImpPortSel("^XZ")									// Fim de Etiqueta
+
+ImpPortSel("^XA")									// Comeco Etiqueta
+ImpPortSel("^XFR:TEMP_FMT.ZPL")                    	// Recall Format
+ImpPortSel("^PQ"+strzero(nQtde,2)+",0,1,Y")			// Qtde etiquetas
+ImpPortSel("^XZ")									// Fim de Etiqueta
+
+ImpPortSel("^XA")									// Comeco Etiqueta
+ImpPortSel("^IDR:TEMP_FMT.ZPL")						// image Delete
+ImpPortSel("^XZ")									// Fim de Etiqueta
+
+Return(.T.)

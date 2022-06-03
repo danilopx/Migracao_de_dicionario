@@ -1,0 +1,2099 @@
+#INCLUDE "MATR900T.CH"
+#INCLUDE "PROTHEUS.CH"
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ MATR900T    ³ Autor ³ Carlos Alday ³    Data ³ 10/02/2011 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Kardex fisico - financeiro - CUSTOMIZADO                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Generico                                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+User Function MATR900T()
+
+Local oReport
+
+If FindFunction("TRepInUse") .And. TRepInUse()
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Interface de impressao                                                  ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	oReport:= ReportDef()
+	oReport:PrintDialog()
+EndIf
+
+Return
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³ReportDef ³ Autor ³Nereu Humberto Junior  ³ Data ³25.07.2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³A funcao estatica ReportDef devera ser criada para todos os ³±±
+±±³          ³relatorios que poderao ser agendados pelo usuario.          ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³ExpO1: Objeto do relatorio                                  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³Nenhum                                                      ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³   DATA   ³ Programador   ³Manutencao efetuada                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³          ³               ³                                            ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function ReportDef()
+
+Local oReport 
+Local oSection1
+Local oSection2
+Local oSection3
+//Local oCell         
+Local aOrdem      := {}
+//Local aSB1Cod     := {}
+//Local aSB1Ite     := {}
+Local cPicB2Qt    := PesqPictQt("B2_QATU" ,18)
+Local cTamB2Qt    := TamSX3('B2_QATU')[1]
+//Local cPicB2Cust  := PesqPict("SB2","B2_CM1",18)
+//Local cTamB2Cust  := TamSX3('B2_CM1')[1]
+Local cPicD1Qt    := PesqPict("SD1","D1_QUANT" ,18)
+Local cTamD1Qt    := TamSX3('D1_QUANT')[1]
+//Local cPicD1Cust  := PesqPict("SD1","D1_CUSTO",18)
+//Local cTamD1Cust  := TamSX3('D1_CUSTO')[1]
+Local cPicD2Qt    := PesqPict("SD2","D2_QUANT" ,18)
+Local cTamD2Qt    := TamSX3('D2_QUANT')[1]
+//Local cPicD2Cust  := PesqPict("SD2","D2_CUSTO1",18)
+//Local cTamD2Cust  := TamSX3('D2_CUSTO1')[1]
+Local cTamD1CF    := TamSX3('D1_CF')[1]  
+Local cTamCCPVPJOP:= TamSX3(MaiorCampo("D3_CC;D3_PROJPMS;D3_OP"))[1] 
+Local lVEIC    	  := Upper(GetMV("MV_VEICULO"))=="S"
+//Local nTamSX1	  := Len(SX1->X1_GRUPO)
+Local nTamData 	  := IIF(__SetCentury(),10,8)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Verifica se utiliza custo unificado por Empresa/Filial       ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+//Local lCusUnif := IIf(FindFunction("A330CusFil"),A330CusFil(),GetMV("MV_CUSFIL",.F.))
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³MV_CUSREP - Parametro utilizado para habilitar o calculo do   ³
+//³            Custo de Reposicao.                               ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+//Local lCusRep  := SuperGetMv("MV_CUSREP",.F.,.F.) .And. (FindFunction("MA330AvRep") .And. MA330AvRep())
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//| Checa versao dos fontes relacionados. NAO REMOVER !!!           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+/*
+If !(FindFunction("SIGACUSA_V")	.And. SIGACUSA_V() >= 20091212)
+	Final(OemToAnsi("Atualizar SIGACUSA.PRX")) //"Atualizar SIGACUSA.PRX"
+EndIf
+If !(FindFunction("SIGACUSB_V")	.And. SIGACUSB_V() >= 20091212)
+	Final(OemToAnsi("Atualizar SIGACUSB.PRX")) //"Atualizar SIGACUSB.PRX"
+EndIf
+If !(FindFunction("MATXFUNB_V")	.And. MATXFUNB_V() >= 20091212)
+	Final(OemToAnsi("Atualizar MATXFUNB.PRX")) //"Atualizar MATXFUNB.PRX"
+EndIf
+If !(FindFunction("MATA330_V")	.And. MATA330_V() >= 20091212)
+	Final(OemToAnsi("Atualizar MATA330.PRX")) //"Atualizar MATA330.PRX"
+EndIf
+*/
+//
+// SX1 parametrização nova
+//
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Criacao do componente de impressao                                      ³
+//³                                                                        ³
+//³TReport():New                                                           ³
+//³ExpC1 : Nome do relatorio                                               ³
+//³ExpC2 : Titulo                                                          ³
+//³ExpC3 : Pergunte                                                        ³
+//³ExpB4 : Bloco de codigo que sera executado na confirmacao da impressao  ³
+//³ExpC5 : Descricao                                                       ³
+//³                                                                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oReport:= TReport():New("MATR900T","Kardex Fisico","MTR900T", {|oReport| ReportPrint(oReport)},"Este programa emitira uma relacao com as movimentacoes"+" "+"dos produtos selecionados, ordenados sequencialmente.")
+oReport:SetLandscape()    
+oReport:SetTotalInLine(.F.)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Verifica as perguntas selecionadas                      ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis utilizadas para parametros                     ³
+//³ mv_par01         // Do produto                           ³
+//³ mv_par02         // Ate o produto                        ³
+//³ mv_par03         // Do tipo                              ³
+//³ mv_par04         // Ate o tipo                           ³
+//³ mv_par05         // Da data                              ³
+//³ mv_par06         // Ate a data                           ³
+//³ mv_par07         // Lista produtos s/movimento           ³
+//³ mv_par08         // Qual Local (almoxarifado)            ³
+//³ MV_par09         // (d)OCUMENTO/(s)EQUENCIA              ³
+//³ mv_par10         // Pagina Inicial                       ³
+//³ mv_par11         // Lista Transf Locali (Sim/Nao)        ³
+//³ mv_par12         // Do  Grupo                            ³
+//³ mv_par13         // Ate o Grupo                          ³
+//³ mv_par14         // Seleciona Filial?                    ³
+//³ mv_par15         // Numero da OP		                   ³
+//³ mv_par16         // OP	sem movimento	                   ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Pergunte("MTR900T",.F.)
+
+Aadd( aOrdem, " Codigo Produto " ) // " Codigo Produto "
+Aadd( aOrdem, " Tipo do Produto" ) // " Tipo do Produto"
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Definicao da Sessao 1 - Dados do Produto                     ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oSection1 := TRSection():New(oReport,"Produtos (Parte 1)",{"SB1","SB2"},aOrdem) //"Produtos (Parte 1)"
+oSection1 :SetTotalInLine(.F.)
+oSection1 :SetReadOnly()
+oSection1 :SetLineStyle()
+                           
+If lVeic
+	TRCell():New(oSection1,"B1_CODITE","SB1",/*Titulo*/					,/*Picture*/,/*Tamanho*/	,/*lPixel*/,/*{|| code-block de impressao }*/)
+EndIf
+TRCell():New(oSection1,"cProduto"	,"   ",/*Titulo*/					,/*Picture*/,/*Tamanho*/	,/*lPixel*/,/*{|| code-block de impressao }*/)
+oSection1:Cell("cProduto"):GetFieldInfo("B1_COD")
+TRCell():New(oSection1,"B1_DESC"		,"SB1",/*Titulo*/					,/*Picture*/,50				,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"B1_UM"		,"SB1","Um"						,/*Picture*/,/*Tamanho*/	,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"cTipo"		,"   ","Tipo"						,"@!"			,2					,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"nQtdSal"		,"   ",".       Qtd. Saldo"						,cPicB2Qt	,cTamB2Qt		,/*lPixel*/,/*{|| code-block de impressao }*/)
+
+//TRCell():New(oSection1,"nVlrSal"	,"   ",STR0035						,cPicB2Cust	,cTamB2Cust		,/*lPixel*/,/*{|| code-block de impressao }*/)
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Definicao da Sessao 2 - Cont. dos dados do Produto           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oSection2 := TRSection():New(oSection1,"Produtos (Parte 2)",{"SB1","SB2"}) //"Produtos (Parte 2)"
+oSection2 :SetTotalInLine(.F.)
+oSection2 :SetReadOnly()
+oSection2 :SetLineStyle()
+
+If lVeic
+	TRCell():New(oSection2	,"cProduto"		,"   ",/*Titulo*/	,/*Picture*/	,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+	oSection2:Cell("cProduto"):GetFieldInfo("B1_COD")
+	TRCell():New(oSection2	,"B1_UM"			,"SB1","Um"		,/*Picture*/	,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+	TRCell():New(oSection2	,"cTipo"			,"   ","Tipo"		,"@!"				,2				,/*lPixel*/,/*{|| code-block de impressao }*/)
+	TRCell():New(oSection2	,"B1_GRUPO"		,"SB1","Grupo"		,/*Picture*/	,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+Endif	
+
+
+If cPaisLoc<>"CHI"
+//	TRCell():New(oSection2	,"B1_POSIPI"	,"SB1",STR0057		,/*Picture*/	,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+Endif	
+//TRCell():New(oSection2		,"B2_LOCALIZ"	,"SB2",STR0058		,/*Picture*/	,/*Tamanho*/,/*lPixel*/,{|| If(lCusUnif , MV_PAR08 , SB2->B2_LOCALIZ) })
+
+
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Definicao da Sessao 3 - Movimentos                           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+oSection3 := TRSection():New(oSection2,"Movimentação dos Produtos",{"SD1","SD2","SD3"}) //"Movimentação dos Produtos"
+oSection3 :SetHeaderPage()
+oSection3 :SetTotalInLine(.F.)
+oSection3 :SetTotalText("T O T A I S  :") //"T O T A I S  :"
+oSection3 :SetReadOnly()
+
+TRCell():New(oSection3,"dDtMov"		,"   ","OPERACAO"+CRLF+"DATA"	,/*Picture*/,nTamData		,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection3,"cTES"			,"   ","TES"						,"@!"			,/*Tamanho*/	,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection3,"cCF"			,"   ","C.F"						,"@!"			,cTamD1CF		,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection3,"cTESTexto"	,"   ","DESCRICAO"						,"@!"			,30				,/*lPixel*/,/*{|| code-block de impressao }*/)
+//TRCell():New(oSection3,"cTraco1"		,"   ","|"+CRLF+"|"				,/*Picture*/,1					,/*lPixel*/,{|| "|" })
+TRCell():New(oSection3,"cArmOri"		,"   ","Origem"						,"@!"			,/*Tamanho*/	,/*lPixel*/,/*{|| code-block de impressao }*/)
+//TRCell():New(oSection3,"cTraco2"		,"   ","|"+CRLF+"|"				,/*Picture*/,1					,/*lPixel*/,{|| "|" })
+TRCell():New(oSection3,"cArmDes"		,"   ","Destino"						,"@!"			,/*Tamanho*/	,/*lPixel*/,/*{|| code-block de impressao }*/)
+//TRCell():New(oSection3,"cTraco3"		,"   ","|"+CRLF+"|"				,/*Picture*/,1					,/*lPixel*/,{|| "|" })
+TRCell():New(oSection3,"cDoc"			,"   ","DOCUMENTO"+CRLF+"NUMERO"	,"@!"			,/*Tamanho*/	,/*lPixel*/,/*{|| code-block de impressao }*/)
+//TRCell():New(oSection3,"cTraco4"		,"   ","|"+CRLF+"|"				,/*Picture*/,1					,/*lPixel*/,{|| "|" })
+TRCell():New(oSection3,"nENTQtd"		,"   ","ENTRADAS"+CRLF+"QUANTIDADE"	,cPicD1Qt	,cTamD1Qt		,/*lPixel*/,/*{|| code-block de impressao }*/)
+//TRCell():New(oSection3,"cTraco5"		,"   ","|"+CRLF+"|"				,/*Picture*/,1					,/*lPixel*/,{|| "|" })
+TRCell():New(oSection3,"nSAIQtd"		,"   ","SAIDAS"+CRLF+"QUANTIDADE"	,cPicD2Qt	,cTamD2Qt		,/*lPixel*/,/*{|| code-block de impressao }*/)
+//TRCell():New(oSection3,"cTraco6"		,"   ","|"+CRLF+"|"				,/*Picture*/,1					,/*lPixel*/,{|| "|" })
+TRCell():New(oSection3,"nSALDQtd"	,"   ","SALDO"+CRLF+"QUANTIDADE"	,cPicB2Qt	,cTamB2Qt		,/*lPixel*/,/*{|| code-block de impressao }*/)
+//TRCell():New(oSection3,"cTraco7"		,"   ","|"+CRLF+"|"				,/*Picture*/,1					,/*lPixel*/,{|| "|" })
+TRCell():New(oSection3,"cCCPVPJOP"	,"   ","CLI,FOR,"+CRLF+"CC , PJ ou OP"	,"@!"			,cTamCCPVPJOP+2,/*lPixel*/,/*{|| code-block de impressao }*/)
+//TRCell():New(oSection3,"cTraco8"		,"   ","|"+CRLF+"|"				,/*Picture*/,1					,/*lPixel*/,{|| "|" })
+TRCell():New(oSection3,"cNfNomeFor"	,"   ","Nome Cliente/Fornecedor"						,"@!"			,50 				,/*lPixel*/,/*{|| code-block de impressao }*/)
+//TRCell():New(oSection3,"cTraco8"		,"   ","|"+CRLF+"|"				,/*Picture*/,1					,/*lPixel*/,{|| "|" })
+TRCell():New(oSection3,"cAutor"		,"   ","Autor"						,"@!"			,15 				,/*lPixel*/,/*{|| code-block de impressao }*/)
+
+// Definir o formato de valores negativos (para o caso de devolucoes)
+oSection3:Cell("nENTQtd"):SetNegative("PARENTHESES")
+//oSection3:Cell("nENTCus"):SetNegative("PARENTHESES")
+oSection3:Cell("nSAIQtd"):SetNegative("PARENTHESES")
+//oSection3:Cell("nSAICus"):SetNegative("PARENTHESES")
+
+TRFunction():New(oSection3:Cell("nENTQtd")	,NIL,"SUM"		,/*oBreak*/,"",cPicD1Qt		,{|| oSection3:Cell("nENTQtd"):GetValue(.T.) },.T.,.F.)
+//TRFunction():New(oSection3:Cell("nENTCus")	,NIL,"SUM"		,/*oBreak*/,"",cPicD1Cust	,{|| oSection3:Cell("nENTCus"):GetValue(.T.) },.T.,.F.)
+
+TRFunction():New(oSection3:Cell("nSAIQtd")	,NIL,"SUM"		,/*oBreak*/,"",cPicD2Qt		,{|| oSection3:Cell("nSAIQtd"):GetValue(.T.) },.T.,.F.)
+//TRFunction():New(oSection3:Cell("nSAICus")	,NIL,"SUM"		,/*oBreak*/,"",cPicD2Cust	,{|| oSection3:Cell("nSAICus"):GetValue(.T.) },.T.,.F.)
+
+TRFunction():New(oSection3:Cell("nSALDQtd")	,NIL,"ONPRINT"	,/*oBreak*/,"",cPicB2Qt		,{|| oSection3:Cell("nSALDQtd"):GetValue(.T.) },.T.,.F.)
+//TRFunction():New(oSection3:Cell("nSALDCus")	,NIL,"ONPRINT"	,/*oBreak*/,"",cPicB2Cust	,{|| oSection3:Cell("nSALDCus"):GetValue(.T.) },.T.,.F.)
+
+oSection3:SetNoFilter("SD1")
+oSection3:SetNoFilter("SD2")
+oSection3:SetNoFilter("SD3")
+
+Return(oReport)
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³ReportPrin³ Autor ³Nereu Humberto Junior  ³ Data ³21.06.2006³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³A funcao estatica ReportDef devera ser criada para todos os ³±±
+±±³          ³relatorios que poderao ser agendados pelo usuario.          ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³Nenhum                                                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ExpO1: Objeto Report do Relatório                           ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³   DATA   ³ Programador   ³Manutencao efetuada                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³          ³               ³                                            ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Static Function ReportPrint(oReport)
+
+Static lIxbConTes := NIL
+
+Local oSection1 := oReport:Section(1) 
+Local oSection2 := oReport:Section(1):Section(1)  
+Local oSection3 := oReport:Section(1):Section(1):Section(1)  
+Local nOrdem    := oReport:Section(1):GetOrder() 
+Local cSelectD1 := '', cWhereD1 := ''
+Local cSelectD2 := '', cWhereD2 := ''
+Local cSelectD3 := '', cWhereD3 := ''
+Local cSelectVe := '%%', cUnion := '%%'
+Local aDadosTran:= {}
+Local lContinua := .F.
+Local lFirst    := .T. 
+Local lTransEnd := .T.
+Local aSalAtu   := { 0,0,0,0,0,0,0 }
+//Local cPicB2Qt2 := PesqPictQt("B2_QTSEGUM" ,18)
+//Local cTRBSD1	:= CriaTrab(,.F.)
+//Local cTRBSD2	:= Subs(cTrbSD1,1,7)+"A"
+//Local cTRBSD3	:= Subs(cTrbSD1,1,7)+"B"
+//Local cSeqIni 	:= Replicate("z",6)
+//Local nRegTr    := 0
+Local nTotRegs  := 0
+//Local nInd      := 0
+Local cProdAnt  := ""
+Local cLocalAnt := ""
+//Local cIndice	:= ""
+//Local cCampo1   := ""
+//Local cCampo2   := ""
+//Local cCampo3   := ""
+//Local cCampo4   := ""
+Local cNumSeqTr := "" 
+//Local cAlias    := ""
+Local cTipoNf   := ""
+// Indica se esta listando relatorio do almox. de processo
+Local lLocProc  := mv_par08 == GetMv("MV_LOCPROC")
+// Indica se deve imprimir movimento invertido (almox. de processo)
+Local lInverteMov :=.F.
+Local lPriApropri :=.T.
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Verifica se existe ponto de entrada                          ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Local lTesNEst := .F.
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Codigo do produto importado - NAO DEVE SER LISTADO           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Local cProdImp := GetMV("MV_PRODIMP")
+
+Local cWhereB1A:= " " 
+Local cWhereB1B:= " " 
+Local cWhereB1C:= " " 
+Local cWhereB1D:= " " 
+
+Local cQueryB1A:= " " 
+Local cQueryB1B:= " " 
+Local cQueryB1C:= " " 
+Local cQueryB1D:= " " 
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Concessionaria de Veiculos                                   ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Local lVEIC    := Upper(GetMV("MV_VEICULO"))=="S"
+
+Local lImpSMov := .F.
+//Local lImpS3   := .F.
+LOCAL cProdMNT := GetMv("MV_PRODMNT")
+LOCAL cProdTER := GetMv("MV_PRODTER")
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis utilizadas para processamento de Filiais           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Local aFilsCalc := MatFilCalc( mv_par14 == 1 )
+Local cFilBack  := cFilAnt
+Local nForFilial:= 0
+
+#IFNDEF TOP
+	Local cCondicao := ""
+#ELSE
+	Local cAliasTop := GetNextAlias()
+#ENDIF
+
+Local __cOpFiltro := Alltrim( mv_par15 ) 
+
+Private bBloco   := { |nV,nX| Trim(nV)+IIf(Valtype(nX)='C',"",Str(nX,1)) }
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³MV_CUSREP - Parametro utilizado para habilitar o calculo do   ³
+//³            Custo de Reposicao.                               ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Private lCusRep  := SuperGetMv("MV_CUSREP",.F.,.F.) .And. (FindFunction("MA330AvRep") .And. MA330AvRep())
+
+cProdMNT := cProdMNT + Space(15-Len(cProdMNT))
+cProdTER := cProdTER + Space(15-Len(cProdTER))
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Verifica se utiliza custo unificado por Empresa/Filial       ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Private lCusUnif := IIf(FindFunction("A330CusFil"),A330CusFil(),GetMV("MV_CUSFIL",.F.))
+
+lCusUnif:=lCusUnif .And. mv_par08 == Repl("*",TamSX3("B2_LOCAL")[1])
+
+Private lDev := .F. // Flag que indica se nota ‚ devolu‡ao (.T.) ou nao (.F.)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ aFilsCalc - Array com filiais a serem processadas            ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+If !Empty(aFilsCalc)
+
+	For nForFilial := 1 To Len( aFilsCalc )
+	
+		If aFilsCalc[ nForFilial, 1 ]
+		
+			cFilAnt := aFilsCalc[ nForFilial, 2 ]
+
+			oReport:EndPage() //Reinicia Pagina
+			
+			oReport:SetTitle( OemToAnsi("KARDEX FISICO") + " " + IIf(lCusUnif,"",OemToAnsi("L O C A L :")+" "+mv_par08+" ") ) // "KARDEX FISICO-FINANCEIRO "###"(SEQUENCIA)"###"(CALCULO)"###"L O C A L :"
+			If nOrdem == 1
+				oReport:SetTitle( oReport:Title()+aFilsCalc[ nForFilial, 3 ] ) //" (Por "###" ,em "
+			Else
+				oReport:SetTitle( oReport:Title()+aFilsCalc[ nForFilial, 3 ] ) //" (Por "###" ,em "
+			EndIf
+				
+			If lVeic
+				oSection1:Cell("cProduto"	):Disable()
+				oSection1:Cell("B1_UM"		):Disable()
+				oSection1:Cell("cTipo"		):Disable()
+				oSection1:Cell("B1_GRUPO"	):Disable()
+			EndIf
+				
+			If mv_par09 $ "Ss"
+				oSection3:Cell("cDoc"):SetTitle("SEQUENCIA"+CRLF+"NUMERO") //"SEQUENCIA"
+			EndIf	
+
+			dbSelectArea("SD1")   // Itens de Entrada
+			nTotRegs += LastRec()
+			
+			dbSelectArea("SD2")   // Itens de Saida
+			nTotRegs += LastRec()
+			
+			dbSelectArea("SD3")   // movimentacoes internas (producao/requisicao/devolucao)
+			nTotRegs += LastRec()
+			
+			dbSelectArea("SB2")  // Saldos em estoque
+			dbSetOrder(1)
+			nTotRegs += LastRec()
+			
+			//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+			//³MTAAVLTES - Ponto de Entrada executado durante a montagem do relatorio  |
+			//|            para verificar se devera considerar TES que nao atualiza    |
+			//|            saldos em estoque.                                          |
+			//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+			lIxbConTes := IF(lIxbConTes == NIL,ExistBlock("MTAAVLTES"),lIxbConTes)
+
+			//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+			//³Filtragem do relatorio                                                  ³
+			//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+			#IFDEF TOP
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³Transforma parametros Range em expressao SQL                            ³	
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				MakeSqlExpr(oReport:uParam)
+				 
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³Query do relatorio da secao 1                                           ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				oReport:Section(1):BeginQuery()	
+				
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³Complemento do SELECT da tabela SD1                                     ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				cSelectD1 := "% D1_CUSTO"
+				cSelectD1 += " CUSTO,"
+				cSelectD1 += "%"
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³Complemento do SELECT da tabela SB1 para MV_VEICULO                     ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ	
+				cSelectVe := "%" 
+				cSelectVe += ","
+				If lVEIC
+					cSelectVe += "SB1.B1_CODITE B1_CODITE,"
+				EndIf
+				cSelectVe += "%" 
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³Complemento do Where da tabela SD1                                      ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ	
+				cWhereD1 := "%" 
+				cWhereD1 += "AND" 
+				If !lCusUnif
+					cWhereD1 += " D1_LOCAL = '" + mv_par08 + "' AND"
+				EndIf
+				cWhereD1 += "%" 
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³Complemento do SELECT da tabela SD2                                     ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				cSelectD2 := "% D2_CUSTO"
+				//cSelectD2 += Str(mv_par10,1,0) // Coloca a Moeda do Custo
+				cSelectD2 += Str( 1 ,1,0) // Coloca a Moeda do Custo
+				cSelectD2 += " CUSTO,"
+				cSelectD2 += "%"	
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³Complemento do Where da tabela SD1                                      ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ	
+				cWhereD2 := "%" 
+				cWhereD2 += "AND" 
+				If !lCusUnif
+					cWhereD2 += " D2_LOCAL = '" + mv_par08 + "' AND"
+				EndIf
+				cWhereD2 += "%"    
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³Complemento do SELECT da tabelas SD3                                    ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				cSelectD3 := "% D3_CUSTO"
+				//cSelectD3 += Str(mv_par10,1,0) // Coloca a Moeda do Custo
+				cSelectD3 += Str( 1 ,1,0) // Coloca a Moeda do Custo
+				cSelectD3 +=	" CUSTO," 
+				cSelectD3 += "%"    
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³Complemento do WHERE da tabela SD3                                      ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+			    cWhereD3 := "%"
+				If SuperGetMV('MV_D3ESTOR', .F., 'N') == 'N' 
+				  	cWhereD3 += " D3_ESTORNO <> 'S' AND"
+				EndIf
+				If SuperGetMV('MV_D3SERVI', .F., 'N') == 'N' .And. IntDL()
+					cWhereD3 += " ( (D3_SERVIC = '   ') OR (D3_SERVIC <> '   ' AND D3_TM <= '500')  "
+					cWhereD3 += " OR  (D3_SERVIC <> '   ' AND D3_TM > '500' AND D3_LOCAL ='"+SuperGetMV('MV_CQ', .F., '98')+"') ) AND"
+				EndIf
+				If !lCusUnif .And. !lLocProc
+					cWhereD3 += " D3_LOCAL = '"+mv_par08+"' AND" 
+				EndIf
+				If	!lVEIC
+					cWhereD3+= " SB1.B1_COD >= '"+mv_par01+"' AND SB1.B1_COD <= '"+mv_par02+"' AND"
+				Else
+					cWhereD3+= " SB1.B1_CODITE >= '"+mv_par01+"' AND SB1.B1_CODITE <= '"+mv_par02+"' AND"
+				EndIf	
+				cWhereD3 += " SB1.B1_FILIAL = '"+xFilial("SB1")+"' AND SB1.B1_TIPO >= '"+mv_par03+"' AND SB1.B1_TIPO <= '"+mv_par04+"' AND"
+				cWhereD3 += " SB1.B1_GRUPO >= '"+mv_par12+"' AND SB1.B1_GRUPO <= '"+mv_par13+"' AND SB1.B1_COD <> '"+cProdimp+"' AND "
+				cWhereD3 += " SB1.D_E_L_E_T_=' ' AND"
+				cWhereD3 += "%"	
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³Complemento do WHERE da tabela SB1 para todos os selects                ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				cWhereB1A:= "%" 
+			   	cWhereB1B:= "%" 
+			    cWhereB1C:= "%" 
+			    cWhereB1D:= "%" 	
+				If	!lVEIC
+					cWhereB1A+= " AND SB1.B1_COD >= '"+mv_par01+"' AND SB1.B1_COD <= '"+mv_par02+"'"
+					cWhereB1B+= " AND SB1.B1_COD = SB1EXS.B1_COD"
+					cWhereB1C+= " SB1.B1_FILIAL = '"+xFilial("SB1")+"' AND SB1.B1_TIPO >= '"+mv_par03+"' AND SB1.B1_TIPO <= '"+mv_par04+"' AND"
+					cWhereB1D+= " SB1EXS.B1_FILIAL = '"+xFilial("SB1")+"' AND SB1EXS.B1_COD >= '"+mv_par01+"' AND SB1EXS.B1_COD <= '"+mv_par02+"' AND SB1EXS.B1_TIPO >= '"+mv_par03+"' AND SB1EXS.B1_TIPO <= '"+mv_par04+"' AND"
+				Else
+					cWhereB1A+= " AND SB1.B1_CODITE >= '"+mv_par01+"' AND SB1.B1_CODITE <= '"+mv_par02+"'"
+					cWhereB1B+= " AND SB1.B1_COD = SB1EXS.B1_COD"
+					cWhereB1C+= " SB1.B1_FILIAL = '"+xFilial("SB1")+"' AND SB1.B1_TIPO >= '"+mv_par03+"' AND SB1.B1_TIPO <= '"+mv_par04+"' AND"
+					cWhereB1D+= " SB1EXS.B1_FILIAL = '"+xFilial("SB1")+"' AND SB1EXS.B1_CODITE >= '"+mv_par01+"' AND SB1EXS.B1_CODITE <= '"+mv_par02+"' AND SB1EXS.B1_TIPO >= '"+mv_par03+"' AND SB1EXS.B1_TIPO <= '"+mv_par04+"' AND"
+				EndIf	
+			
+				cWhereB1C += " SB1.B1_GRUPO >= '"+mv_par12+"' AND SB1.B1_GRUPO <= '"+mv_par13+"' AND SB1.B1_COD <> '"+cProdimp+"' AND "
+				cWhereB1C += " SB1.D_E_L_E_T_=' '"
+				cWhereB1D += " SB1EXS.B1_GRUPO >= '"+mv_par12+"' AND SB1EXS.B1_GRUPO <= '"+mv_par13+"' AND SB1EXS.B1_COD <> '"+cProdimp+"' AND "
+				cWhereB1D += " SB1EXS.D_E_L_E_T_=' '"	
+				
+				cQueryB1A:= Subs(cWhereB1A,2)
+				cQueryB1B:= Subs(cWhereB1B,2)
+				cQueryB1C:= Subs(cWhereB1C,2)
+				cQueryB1D:= Subs(cWhereB1D,2)
+				
+				cWhereB1A+= "%" 
+			   	cWhereB1B+= "%" 
+			    cWhereB1C+= "%" 
+			    cWhereB1D+= "%" 	
+			 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³ So inclui as condicoes a seguir qdo lista produtos sem ³
+				//³ movimento                                              ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				cQueryD1 := " FROM "
+				cQueryD1 += RetSqlName("SB1") + " SB1"
+				cQueryD1 += (", " + RetSqlName("SD1")+ " SD1 ")
+				cQueryD1 += (", " + RetSqlName("SF4")+ " SF4 ")
+				cQueryD1 += " WHERE SB1.B1_COD = D1_COD"
+				cQueryD1 += (" AND D1_FILIAL = '"+xFilial("SD1")+"'")
+				cQueryD1 += (" AND F4_FILIAL = '" + xFilial("SF4") + "'")
+				cQueryD1 += (" AND SD1.D1_TES = F4_CODIGO AND F4_ESTOQUE = 'S'")
+				cQueryD1 += (" AND D1_DTDIGIT >= '" + DTOS(mv_par05) + "'")
+				cQueryD1 += (" AND D1_DTDIGIT <= '" + DTOS(mv_par06) + "'")
+				cQueryD1 +=  " AND D1_ORIGLAN <> 'LF'"
+				If !lCusUnif
+					cQueryD1 += " AND D1_LOCAL = '" + mv_par08 + "'"
+				EndIf
+				cQueryD1 += " AND SD1.D_E_L_E_T_=' ' AND SF4.D_E_L_E_T_=' '"
+				
+				cQueryD2 := " FROM "
+				cQueryD2 += RetSqlName("SB1") + " SB1 , "+ RetSqlName("SD2")+ " SD2 , "+ RetSqlName("SF4")+" SF4 "
+				cQueryD2 += " WHERE SB1.B1_COD = D2_COD AND D2_FILIAL = '"+xFilial("SD2")+"'"
+				cQueryD2 += " AND F4_FILIAL = '"+xFilial("SF4")+"' AND SD2.D2_TES = F4_CODIGO AND F4_ESTOQUE = 'S'"
+				cQueryD2 += " AND D2_EMISSAO >= '"+DTOS(mv_par05)+"' AND D2_EMISSAO <= '"+DTOS(mv_par06)+"'"
+				cQueryD2 += " AND D2_ORIGLAN <> 'LF'"
+				If !lCusUnif
+					cQueryD2 += " AND D2_LOCAL = '"+mv_par08+"'"
+				EndIf
+				cQueryD2 += " AND SD2.D_E_L_E_T_=' ' AND SF4.D_E_L_E_T_=' '"	
+				
+				cQueryD3 := " FROM "
+				cQueryD3 += RetSqlName("SB1") + " SB1 , "+ RetSqlName("SD3")+ " SD3 "
+				cQueryD3 += " WHERE SB1.B1_COD = D3_COD AND D3_FILIAL = '"+xFilial("SD3")+"' "
+				cQueryD3 += " AND D3_EMISSAO >= '"+DTOS(mv_par05)+"' AND D3_EMISSAO <= '"+DTOS(mv_par06)+"'"
+				If SuperGetMV('MV_D3ESTOR', .F., 'N') == 'N'
+					cQueryD3 += " AND D3_ESTORNO <> 'S'"
+				EndIf
+				If SuperGetMV('MV_D3SERVI', .F., 'N') == 'N' .And. IntDL()
+					cQueryD3 += " AND ( (D3_SERVIC = '   ') OR (D3_SERVIC <> '   ' AND D3_TM <= '500')  "
+					cQueryD3 += " OR  (D3_SERVIC <> '   ' AND D3_TM > '500' AND D3_LOCAL ='"+SuperGetMV('MV_CQ', .F., '98')+"') )"
+				EndIf					
+				If !lCusUnif .And. !lLocProc
+					cQueryD3 += " AND D3_LOCAL = '"+mv_par08+"'"
+				EndIf
+				cQueryD3 += " AND SD3.D_E_L_E_T_=' '"	
+				
+				cQuerySub:= "SELECT 1 "
+				
+				If mv_par07 == 1
+					cQuery2 := " AND NOT EXISTS (" + cQuerySub + cQueryD1
+					cQuery2 += cQueryB1B
+					cQuery2 += " AND "
+					cQuery2 += cQueryB1C
+					cQuery2 += ") AND NOT EXISTS ("
+					cQuery2 += cQuerySub + cQueryD2
+					cQuery2 += cQueryB1B
+					cQuery2 += " AND "
+					cQuery2 += cQueryB1C
+					cQuery2 += ") AND NOT EXISTS ("
+					cQuery2 += cQuerySub + cQueryD3
+					cQuery2 += cQueryB1B
+					cQuery2 += " AND "
+					cQuery2 += cQueryB1C + ")"
+			        
+					cUnion := "%"
+					cUnion += " UNION SELECT 'SB1'"		// 01
+					cUnion += ", SB1EXS.B1_COD"			// 02
+					cUnion += ", SB1EXS.B1_TIPO"		// 03
+					cUnion += ", SB1EXS.B1_UM"			// 04
+					cUnion += ", SB1EXS.B1_GRUPO"		// 05
+					cUnion += ", SB1EXS.B1_DESC"		// 06
+					cUnion += ", SB1EXS.B1_POSIPI"		// 07
+					cUnion += ", ''"					// 08
+					cUnion += ", ''"					// 09
+					cUnion += ", ''"					// 10
+					cUnion += ", ''"					// 11
+					cUnion += ", ''"					// 12
+					cUnion += ", ''"					// 13
+					cUnion += ", ''"					// 14
+					cUnion += ", 0"						// 15
+					cUnion += ", 0"						// 16
+					cUnion += ", ''"					// 17
+					cUnion += ", ''"					// 18
+					cUnion += ", ''"					// 19
+					cUnion += ", ''"					// 20
+					cUnion += ", ''"					// 21
+					cUnion += ", ''"					// 22
+					cUnion += ", ''"					// 23
+					cUnion += ", ''"					// 24
+					cUnion += ", 0"						// 25
+					cUnion += ", ''"					// 26
+					cUnion += ", ''"					// 27
+					If lVEIC
+						cUnion += ", SB1EXS.B1_CODITE CODITE"	// 28
+					EndIf		
+					cUnion += ", 0"						// 29		   
+					cUnion += ", ''"						// 30		   
+					cUnion += ", ''"						// 31 - DESTINO		   
+					cUnion += ", ''"						// 32	- ORIGEM
+					cUnion += ", ''"						// 33	- AUTOR
+					cUnion += ", ''"						// 34 - OP da transferencia de armazens
+					cUnion += " FROM "+RetSqlName("SB1") + " SB1EXS WHERE"
+					cUnion += cQueryB1D
+					cUnion += cQuery2
+					cUnion += "%"
+				EndIf
+				
+				cOrder := "%"
+				If ! lVEIC
+					If nOrdem == 1 //" Codigo Produto "###" Tipo do Produto"
+						cOrder += " 2,"
+					ElseIf nOrdem == 2
+						cOrder += " 3,2,"
+					EndIf
+				Else
+					If nOrdem ==1 //" Codigo Produto "###" Tipo do Produto"
+						cOrder += " 28, 2, 5," 	// B1_CODITE, B1_COD, B1_GRUPO
+					ElseIf nOrdem == 2
+						cOrder += " 3, 28, 2, 5," // B1_TIPO, B1_CODITE, B1_COD, B1_GRUPO
+					EndIf
+				EndIf
+			
+				If 1=1 // mv_par11 == 1 
+					cOrder += "17,12"+IIf(lVEIC,',29',',28')
+				Else
+					If lCusUnif
+						cOrder += "8,12"+IIf(lVEIC,',29',',28')
+					Else
+						cOrder += "17,8,12"+IIf(lVEIC,',29',',28')
+					EndIf
+				EndIf	
+				cOrder += "%"
+				
+				cTmpPar1	:= "999"
+				cTmpPar2	:= "S"
+				cTmpPar3	:= IIf( mv_par16 = 1,"S","N")
+				cWhereTmp := "%"
+				If mv_par16 = 1
+					cWhereTmp += " ( "
+					cWhereTmp += "		NOT EXISTS ( "
+					cWhereTmp += "		SELECT 'X' FROM " +RetSqlName("SD3") + " TMP "
+					cWhereTmp += "			WHERE TMP.D3_FILIAL = '"+xFilial("SD3")+"' AND TMP.D3_LOCAL=SD3.D3_LOCAL AND "
+					cWhereTmp += "					TMP.D_E_L_E_T_= ' ' AND "
+					cWhereTmp += "					TMP.D3_OPTRANS = SD3.D3_OPTRANS AND "
+					cWhereTmp += "					TMP.D3_TM = '" + cTmpPar1 + "' AND "
+					cWhereTmp += "					TMP.D3_ESTORNO != '" + cTmpPar2 + "' "
+					cWhereTmp += "						) "
+					cWhereTmp += "	) "
+				Else
+					cWhereTmp += " SD3.D3_EMISSAO >= '" + DTOS(mv_par05) + "' AND SD3.D3_EMISSAO <= '" + DTOS(mv_par06) + "' "
+				EndIf
+				cWhereTmp += "%"
+				/*
+							AND
+							(
+							SD3.D3_EMISSAO >= %Exp:mv_par05%	AND	SD3.D3_EMISSAO <= %Exp:mv_par06%	AND %Exp:cTmpPar3%='N'
+							)
+				*/
+				BeginSql Alias cAliasTop
+				
+					SELECT 	'SD1' ARQ, 				//-- 01 ARQ
+							 SB1.B1_COD PRODUTO, 	//-- 02 PRODUTO
+							 SB1.B1_TIPO TIPO, 		//-- 03 TIPO
+							 SB1.B1_UM,   			//-- 04 UM
+							 SB1.B1_GRUPO,      	//-- 05 GRUPO
+							 SB1.B1_DESC,      		//-- 06 DESCR
+						     SB1.B1_POSIPI, 		//-- 07
+						     D1_SEQCALC SEQCALC,    //-- 08
+							 D1_DTDIGIT DATA,		//-- 09 DATA
+							 D1_TES TES,			//-- 10 TES
+							 D1_CF CF,				//-- 11 CF
+							 D1_NUMSEQ SEQUENCIA,	//-- 12 SEQUENCIA
+							 D1_DOC DOCUMENTO,		//-- 13 DOCUMENTO
+							 D1_SERIE SERIE,		//-- 14 SERIE
+							 D1_QUANT QUANTIDADE,	//-- 15 QUANTIDADE
+							 D1_QTSEGUM QUANT2UM,	//-- 16 QUANT2UM
+							 D1_LOCAL ARMAZEM,		//-- 17 ARMAZEM
+				             ' ' PROJETO,			//-- 18 PROJETO
+							 ' ' OP,				//-- 19 OP
+							 ' ' CC,				//-- 20 OP
+							 D1_FORNECE FORNECEDOR,	//-- 21 FORNECEDOR
+							 D1_LOJA LOJA,			//-- 22 LOJA
+							 ' ' PEDIDO,            //-- 23 PEDIDO
+							 D1_TIPO TIPONF,		//-- 24 TIPO NF
+							 %Exp:cSelectD1%		//-- 25 CUSTO 
+							 ' ' TRT, 				//-- 26 TRT
+							 D1_LOTECTL LOTE 	   	//-- 27 LOTE
+							 %Exp:cSelectVe%       	//-- 28 CODITE
+							 SD1.R_E_C_N_O_ NRECNO  //-- 29 RECNO
+							 ,SF4.F4_TEXTO TES_TEXTO
+							 ,' ' AS DESTINO
+							,' ' AS ORIGEM				
+							,' ' AS AUTOR
+							,' ' AS D3_OPTRANS
+
+					FROM %table:SB1% SB1,%table:SD1% SD1,%table:SF4% SF4
+					
+					WHERE SB1.B1_COD     =  SD1.D1_COD		AND  	SD1.D1_FILIAL  =  %xFilial:SD1%		AND
+						  SF4.F4_FILIAL  =  %xFilial:SF4%  	AND 	SD1.D1_TES     =  SF4.F4_CODIGO		AND
+						  SF4.F4_ESTOQUE =  'S'				AND 	SD1.D1_DTDIGIT >= %Exp:mv_par05%   AND
+						  SD1.D1_DTDIGIT <= %Exp:mv_par06%	AND		SD1.D1_ORIGLAN <> 'LF'				   
+						  %Exp:cWhereD1%
+						  SD1.%NotDel%						AND 	SF4.%NotDel%                           
+						  %Exp:cWhereB1A%                   AND
+						  %Exp:cWhereB1C%
+						  
+				    UNION
+				    
+					SELECT 'SD2',	     			
+							SB1.B1_COD,	        	
+							SB1.B1_TIPO,		    
+							SB1.B1_UM,				
+							SB1.B1_GRUPO,		    
+							SB1.B1_DESC,		    
+							SB1.B1_POSIPI,
+							D2_SEQCALC,
+							D2_EMISSAO,				
+							D2_TES,					
+							D2_CF,					
+							D2_NUMSEQ,				
+							D2_DOC,					
+							D2_SERIE,				
+							D2_QUANT,				
+							D2_QTSEGUM,				
+							D2_LOCAL,				
+							' ',					
+							' ',					
+							' ',					
+							D2_CLIENTE,				
+							D2_LOJA,				
+							D2_PEDIDO,
+							D2_TIPO,				
+							%Exp:cSelectD2%			
+							' ', 					
+							D2_LOTECTL
+							%Exp:cSelectVe%
+							SD2.R_E_C_N_O_ SD2RECNO //-- 29 RECNO
+							 ,SF4.F4_TEXTO TES_TEXTO
+							 ,' ' AS DESTINO
+							,' ' AS ORIGEM				
+							,' ' AS AUTOR
+							,' ' AS D3_OPTRANS
+
+					FROM %table:SB1% SB1,%table:SD2% SD2,%table:SF4% SF4
+					
+					WHERE	SB1.B1_COD     =  SD2.D2_COD		AND	SD2.D2_FILIAL  = %xFilial:SD2%		AND
+							SF4.F4_FILIAL  = %xFilial:SF4% 		AND	SD2.D2_TES     =  SF4.F4_CODIGO		AND
+							SF4.F4_ESTOQUE =  'S'				AND	SD2.D2_EMISSAO >= %Exp:mv_par05%	AND
+							SD2.D2_EMISSAO <= %Exp:mv_par06%	AND	SD2.D2_ORIGLAN <> 'LF'				   
+							%Exp:cWhereD2%
+							SD2.%NotDel%						AND SF4.%NotDel%						   
+							%Exp:cWhereB1A%                     AND
+						  	%Exp:cWhereB1C%
+			
+					UNION		
+
+					SELECT 	'SD3',	    			
+							SB1.B1_COD,	    	    
+							SB1.B1_TIPO,		    
+							SB1.B1_UM,				
+							SB1.B1_GRUPO,	     	
+							SB1.B1_DESC,		    
+							SB1.B1_POSIPI,
+							D3_SEQCALC,
+							D3_EMISSAO,				
+							D3_TM,					
+							D3_CF,					
+							D3_NUMSEQ,				
+							D3_DOC,					
+							' ',					
+							D3_QUANT,				
+							D3_QTSEGUM,				
+							D3_LOCAL,				
+							D3_PROJPMS,
+							D3_OP,					
+							D3_CC,
+							' ',					
+							' ',					
+							' ',					
+							' ',									
+							%Exp:cSelectD3%			
+							D3_TRT, 
+							D3_LOTECTL
+							%Exp:cSelectVe%
+							SD3.R_E_C_N_O_ SD3RECNO //-- 29 RECNO
+							 ,CASE
+							 		WHEN D3_TM <= '500' AND D3_CF IN ('PR0','ER0','PR1','ER1')
+										THEN 'PRODUCAO'
+							 		WHEN D3_TM > '500' AND D3_CF IN ('PR0','ER0','PR1','ER1')
+										THEN 'DEVOLUCAO'
+							 		WHEN D3_TM <= '500' AND D3_CF IN ('DE4','DE7') AND D3_LOCAL='21'
+										THEN 'TRANSFERENCIA PRODUCAO'
+							 		//WHEN D3_TM <= '500' AND D3_CF IN ('DE4','DE7')
+									//	THEN 'DEVOLUCAO'
+							 		WHEN D3_TM > '500' AND D3_CF IN ('RE4','RE7') AND D3_LOCAL='21'
+										THEN 'DEVOLUCAO'
+							 		WHEN D3_TM > '500' AND D3_CF IN ('RE4','RE7')
+										THEN 'TRANFERENCIA OP'
+							 		WHEN D3_TM <= '500' AND D3_CF IN ('RE4','DE4','RE7','DE7')
+										THEN 'TRANFERENCIA INTERNA'
+							 		WHEN D3_TM > '500' AND D3_CF IN ('RE4','DE4','RE7','DE7')
+										THEN 'TRANFERENCIA INTERNA'
+							 		WHEN D3_TM <= '500' AND D3_CF IN ('DE0','DE6') AND D3_OP=' '
+										THEN 'TRANSFERENCIA DE CQ'
+							 		WHEN D3_TM <= '500' AND D3_CF IN ('RE0','RE6') AND D3_OP=' '
+										THEN 'CONSUMO PROPRIO'
+							 		WHEN D3_TM > '500' AND D3_CF IN ('RE0','DE0','RE6','DE6') AND D3_OP=' '
+										THEN 'CONSUMO PROPRIO'
+							 		WHEN D3_TM <= '500' AND D3_CF IN ('RE0','DE0','RE6','DE6') AND D3_OP != ' '
+										THEN 'APONTAMENTO DE OP'
+							 		WHEN D3_TM <= '500' AND D3_CF IN ('RE1','DE1','RE5','DE5') 
+										THEN 'APONTAMENTO DE OP'
+							 		WHEN D3_TM > '500' AND D3_CF IN ('RE0','DE0','RE6','DE6') AND D3_OP != ' '
+										THEN 'APONTAMENTO DE OP'
+							 		WHEN D3_TM > '500' AND D3_CF IN ('RE1','DE1','RE5','DE5') 
+										THEN 'APONTAMENTO DE OP'
+									ELSE 'MOVIMENTO NAO CLASSIFICADO'
+								END AS TES_TEXTO
+							,CASE
+							 		WHEN LEFT(D3_CF,2) = 'RE' 
+										THEN IsNull(SDB.DB_LOCAL,' ')
+									ELSE ' '
+								END AS DESTINO
+							,CASE
+							 		WHEN LEFT(D3_CF,2) = 'DE' 
+										THEN IsNull(SDB.DB_LOCAL,' ')
+									ELSE ' '
+								END AS ORIGEM
+							,RTRIM(D3_USUARIO) AS AUTOR
+							,D3_OPTRANS AS D3_OPTRANS
+
+					FROM %table:SB1% SB1
+					INNER JOIN %table:SD3% SD3 ON SB1.B1_COD     =  SD3.D3_COD 		AND SD3.D3_FILIAL  =  %xFilial:SD3%	
+					LEFT OUTER JOIN %table:SDB% SDB ON SD3.D3_COD=SDB.DB_PRODUTO AND SD3.D3_NUMSEQ=SDB.DB_NUMSEQ AND SD3.D3_DOC=SDB.DB_DOC AND SDB.DB_LOCAL!=SD3.D3_LOCAL AND SDB.%NotDel% 
+					WHERE	
+							%Exp:cWhereTmp% 	
+							AND
+							%Exp:cWhereD3% 	
+							SD3.%NotDel% 
+							
+					%Exp:cUnion%			
+			
+					ORDER BY %Exp:cOrder%
+				
+				EndSql 
+			
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³Metodo EndQuery ( Classe TRSection )                                    ³
+				//³                                                                        ³
+				//³Prepara o relatorio para executar o Embedded SQL.                       ³
+				//³                                                                        ³
+				//³ExpA1 : Array com os parametros do tipo Range                           ³
+				//³                                                                        ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				oReport:Section(1):EndQuery(/*Array com os parametros do tipo Range*/)
+				
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³Inicio da impressao do fluxo do relatorio                               ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				dbSelectArea(cAliasTop)
+				oReport:SetMeter(nTotRegs)
+				
+				TcSetField(cAliasTop,DATA ,"D", TamSx3("D1_DTDIGIT")[1], TamSx3("D1_DTDIGIT")[2] )
+
+				While !oReport:Cancel() .And. !(cAliasTop)->(Eof())
+					
+					If oReport:Cancel()
+						Exit
+					EndIf
+					
+					oReport:IncMeter()
+					//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+					//³ Se nao encontrar no arquivo de saldos ,nao lista ³
+					//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+					dbSelectArea("SB2")
+					If !dbSeek(xFilial("SB2")+(cAliasTop)->PRODUTO+If(lCusUnif,"",mv_par08))
+						dbSelectArea(cAliasTop)
+						dbSkip()
+						Loop
+					EndIf
+					
+					dbSelectArea(cAliasTop)
+					cProdAnt  := (cAliasTop)->PRODUTO
+					cLocalAnt := SB2->B2_LOCAL
+					
+					If !Empty(__cOpFiltro) 
+						If .not. ( At(__cOpFiltro,(cAliasTop)->OP)!=0 .or. At(__cOpFiltro,(cAliasTop)->D3_OPTRANS)!=0)
+							dbSelectArea(cAliasTop)
+							dbSkip()
+							Loop
+						EndIf
+					EndIf
+					
+					lFirst:=.F.
+			
+					MR900ImpS1(@aSalAtu,cAliasTop,.T.,lVEIC,lCusUnif,oSection1,oSection2,oReport)
+					
+					oSection3:Init()
+					While !oReport:Cancel() .And. !(cAliasTop)->(Eof()) .And. (cAliasTop)->PRODUTO = cProdAnt .And. If(lCusUnif .Or. lLocProc,.T.,IIf((cAliasTop)->ARQ <> 'SB1',(cAliasTop)->ARMAZEM==cLocalAnt,.T.))
+						oReport:IncMeter()
+						lContinua := .F.
+						lImpSMov  := .F.
+						If Alltrim((cAliasTop)->ARQ) $ "SD1/SD2"
+							lFirst:=.T.
+							SF4->(dbSeek(xFilial("SF4")+(cAliasTop)->TES))
+							//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+							//³ Despreza Notas Fiscais Lancadas Pelo Modulo do Livro Fiscal  ³
+							//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+							//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+							//³ Executa ponto de entrada para verificar se considera TES que ³
+							//³ NAO ATUALIZA saldos em estoque.                              ³
+							//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+							If lIxbConTes .And. SF4->F4_ESTOQUE != "S"
+								lTesNEst := ExecBlock("MTAAVLTES",.F.,.F.)
+								lTesNEst := If(ValType(lTesNEst) # "L",.F.,lTesNEst)
+							EndIf
+							If SF4->F4_ESTOQUE != "S" .And. !lTesNEst
+								dbSkip()
+								Loop
+							EndIf
+						ElseIf Alltrim((cAliasTop)->ARQ) == "SD3"
+							lFirst:=.T.
+							//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+							//³ Quando movimento ref apropr. indireta, so considera os         ³
+							//³ movimentos com destino ao almoxarifado de apropriacao indireta.³
+							//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+							lInverteMov:=.F.
+
+							If !Empty(__cOpFiltro) 
+								If .not. ( At(__cOpFiltro,(cAliasTop)->OP)!=0 .or. At(__cOpFiltro,(cAliasTop)->D3_OPTRANS)!=0)
+									dbSelectArea(cAliasTop)
+									dbSkip()
+									Loop
+								EndIf
+							EndIf
+									
+							If (cAliasTop)->ARMAZEM != cLocalAnt .Or. lCusUnif
+								If !(Substr((cAliasTop)->CF,3,1) == "3")
+									If !lCusUnif
+										dbSkip()
+										Loop
+									EndIf
+								ElseIf lPriApropri
+									lInverteMov:=.T.
+								EndIf
+							EndIf
+							//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+							//³ Caso seja uma transferencia de localizacao verifica se lista   ³
+							//³ o movimento ou nao                                             ³
+							//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+							If mv_par11 == 2 .And. Substr((cAliasTop)->CF,3,1) == "4"
+								cNumSeqTr := (cAliasTOP)->(PRODUTO+SEQUENCIA+ARMAZEM)
+								aDadosTran:={	(cAliasTOP)->TES			,;
+													(cAliasTOP)->QUANTIDADE	,;
+													(cAliasTOP)->CUSTO		,;
+													(cAliasTOP)->QUANT2UM	,;
+													(cAliasTOP)->TIPO			,;
+													(cAliasTOP)->DATA			,;
+													(cAliasTOP)->CF			,;
+													(cAliasTOP)->SEQUENCIA	,;
+													(cAliasTOP)->DOCUMENTO	,;
+													(cAliasTOP)->PRODUTO		,;
+													(cAliasTOP)->OP			,;
+													(cAliasTOP)->PROJETO		,;
+													(cAliasTOP)->CC			,;
+													(cAliasTOP)->ARQ			,;
+													(cAliasTOP)->TES_TEXTO	,;
+													(cAliasTOP)->DESTINO		,;
+													(cAliasTOP)->ORIGEM		,;
+													(cAliasTOP)->AUTOR		,;
+													(cAliasTOP)->D3_OPTRANS   }
+
+								dbSkip()
+								If (cAliasTOP)->(PRODUTO+SEQUENCIA+ARMAZEM) == cNumSeqTr
+									dbSkip()
+									Loop
+								Else
+									lContinua := .T.
+									If !Localiza(aDadosTran[10])
+										If lFirst
+										  	oSection3:Cell("cAutor"):SetValue(aDadosTran[18])
+										  	oSection3:Cell("cArmOri"):SetValue(aDadosTran[17])
+										  	oSection3:Cell("cArmDes"):SetValue(aDadosTran[16])
+
+											oSection3:Cell("dDtMov"):SetValue(STOD(aDadosTran[6]))
+											oSection3:Cell("cTES"):SetValue(aDadosTran[1])
+											oSection3:Cell("cTESTexto"):SetValue(aDadosTran[15])
+											If ( cPaisLoc=="BRA" )
+												oSection3:Cell("cCF"):Show()
+												If	lInverteMov
+													oSection3:Cell("cCF"):SetValue(Substr(aDadosTran[7],1,3)+"*")
+												Else
+													oSection3:Cell("cCF"):SetValue(aDadosTran[7])
+												EndIf
+											Else
+												oSection3:Cell("cCF"):Hide()
+												oSection3:Cell("cCF"):SetValue("   ")
+											EndIf
+											If mv_par09 $ "Ss"
+												oSection3:Cell("cDoc"):SetValue(aDadosTran[8])
+											Else
+												oSection3:Cell("cDoc"):SetValue(aDadosTran[9])
+											Endif
+										EndIf
+										If aDadosTran[1] <= "500"
+											oSection3:Cell("nENTQtd"):Show()
+											
+											oSection3:Cell("nENTQtd"):SetValue(aDadosTran[2])
+											
+											oSection3:Cell("nSAIQtd"):Hide()
+											oSection3:Cell("nSAIQtd"):SetValue(0)
+											
+											aSalAtu[1] += aDadosTran[2]
+											aSalAtu[7] += aDadosTran[4]
+										Else
+											oSection3:Cell("nENTQtd"):Hide()
+											oSection3:Cell("nENTQtd"):SetValue(0)
+											
+											oSection3:Cell("nSAIQtd"):Show()
+											
+											oSection3:Cell("nSAIQtd"):SetValue(aDadosTran[2])
+											
+											aSalAtu[1] -= aDadosTran[2]
+											aSalAtu[7] -= aDadosTran[4]
+										EndIf
+									Else
+										lTransEnd := .F.
+									EndIf
+								EndIf
+							EndIf
+						EndIf
+						If lFirst .And. !lContinua .And. lTransEnd
+						  	oSection3:Cell("cAutor"):SetValue(AUTOR)
+						  	oSection3:Cell("cArmOri"):SetValue(ORIGEM)
+							oSection3:Cell("cArmDes"):SetValue(DESTINO)
+							oSection3:Cell("dDtMov"):SetValue(STOD(DATA))
+							oSection3:Cell("cTES"):SetValue(TES)
+							oSection3:Cell("cTESTexto"):SetValue(TES_TEXTO)
+							If ( cPaisLoc=="BRA" )
+								oSection3:Cell("cCF"):Show()
+								oSection3:Cell("cCF"):SetValue(CF)
+								If	lInverteMov
+									oSection3:Cell("cCF"):SetValue(Substr(CF,1,3)+"*")
+								Else
+									oSection3:Cell("cCF"):SetValue(CF)
+								EndIf
+							Else
+								oSection3:Cell("cCF"):Hide()
+								oSection3:Cell("cCF"):SetValue("   ")
+							EndIf
+							If mv_par09 $ "Ss"
+								oSection3:Cell("cDoc"):SetValue(SEQUENCIA)
+							Else
+								oSection3:Cell("cDoc"):SetValue(DOCUMENTO)
+							Endif
+						EndIf
+						
+						Do Case
+							Case Alltrim((cAliasTop)->ARQ) == "SD1" .And. !lContinua .And. lTransEnd
+								lDev:=MTR900Dev("SD1",cAliasTop)
+								If (cAliasTOP)->TES <= "500" .And. !lDev
+									If (cAliasTOP)->TIPONF != "C"
+									Else
+									EndIf
+									
+									oSection3:Cell("nENTQtd"):Show()
+									
+									oSection3:Cell("nENTQtd"):SetValue((cAliasTOP)->QUANTIDADE)
+									
+									oSection3:Cell("nSAIQtd"):Hide()
+									oSection3:Cell("nSAIQtd"):SetValue(0)
+									
+									aSalAtu[1] += (cAliasTOP)->QUANTIDADE
+									aSalAtu[7] += (cAliasTOP)->QUANT2UM
+								Else
+									If (cAliasTOP)->TIPONF != "C"
+									Else
+									EndIf
+									
+									oSection3:Cell("nENTQtd"):Hide()
+									oSection3:Cell("nENTQtd"):SetValue(0)
+									
+									oSection3:Cell("nSAIQtd"):Show()
+									
+									If lDev
+										oSection3:Cell("nSAIQtd"):SetValue((cAliasTOP)->QUANTIDADE * -1)
+										
+										aSalAtu[1] += (cAliasTOP)->QUANTIDADE
+										aSalAtu[7] += (cAliasTOP)->QUANT2UM
+									Else
+										oSection3:Cell("nSAIQtd"):SetValue((cAliasTOP)->QUANTIDADE)
+										
+										aSalAtu[1] 			-= (cAliasTOP)->QUANTIDADE
+										aSalAtu[7]			-= (cAliasTOP)->QUANT2UM
+									EndIf
+								EndIf
+							Case Alltrim((cAliasTop)->ARQ) = "SD2" .And. !lContinua .And. lTransEnd
+								lDev:=MTR900Dev("SD2",cAliasTop)
+								If (cAliasTOP)->TES <= "500" .Or. lDev
+									If lDev
+										oSection3:Cell("nENTQtd"):Show()
+										
+										oSection3:Cell("nENTQtd"):SetValue((cAliasTOP)->QUANTIDADE * -1)
+										
+										aSalAtu[1] 			-= (cAliasTOP)->QUANTIDADE
+										aSalAtu[7]			-= (cAliasTOP)->QUANT2UM
+									Else
+										oSection3:Cell("nENTQtd"):Show()
+										
+										oSection3:Cell("nENTQtd"):SetValue((cAliasTOP)->QUANTIDADE)
+										
+										aSalAtu[1]			+= (cAliasTOP)->QUANTIDADE
+										aSalAtu[7]			+= (cAliasTOP)->QUANT2UM
+									EndIf
+									
+									If (cAliasTOP)->TIPONF != "C"
+									Else
+									EndIf
+									oSection3:Cell("nSAIQtd"):Hide()
+									oSection3:Cell("nSAIQtd"):SetValue(0)
+								Else
+									If (cAliasTOP)->TIPONF != "C"
+									Else
+									EndIf
+									
+									oSection3:Cell("nENTQtd"):Hide()
+									oSection3:Cell("nENTQtd"):SetValue(0)
+									
+									oSection3:Cell("nSAIQtd"):Show()
+									
+									oSection3:Cell("nSAIQtd"):SetValue((cAliasTOP)->QUANTIDADE)
+									
+									aSalAtu[1]			-= (cAliasTOP)->QUANTIDADE
+									aSalAtu[7]			-= (cAliasTOP)->QUANT2UM
+								EndIf
+							Case Alltrim((cAliasTop)->ARQ) == "SD3" .And. !lContinua  .And. lTransEnd
+								lDev := .F.
+								If	lInverteMov
+									If (cAliasTOP)->TES > "500"
+										oSection3:Cell("nENTQtd"):Show()
+										
+										oSection3:Cell("nENTQtd"):SetValue((cAliasTOP)->QUANTIDADE)
+										
+										oSection3:Cell("nSAIQtd"):Hide()
+										oSection3:Cell("nSAIQtd"):SetValue(0)
+										
+										aSalAtu[1]			+= (cAliasTOP)->QUANTIDADE
+										aSalAtu[7]			+= (cAliasTOP)->QUANT2UM
+									Else
+										oSection3:Cell("nENTQtd"):Hide()
+										oSection3:Cell("nENTQtd"):SetValue(0)
+										
+										oSection3:Cell("nSAIQtd"):Show()
+										
+										oSection3:Cell("nSAIQtd"):SetValue((cAliasTOP)->QUANTIDADE)
+										
+										aSalAtu[1]			-= (cAliasTOP)->QUANTIDADE
+										aSalAtu[7]			-= (cAliasTOP)->QUANT2UM
+									EndIf
+									If lCusUnif
+										lPriApropri:=.F.
+									EndIf
+								Else
+									If (cAliasTOP)->TES <= "500"
+										oSection3:Cell("nENTQtd"):Show()
+										
+										oSection3:Cell("nENTQtd"):SetValue((cAliasTOP)->QUANTIDADE)
+										
+										oSection3:Cell("nSAIQtd"):Hide()
+										oSection3:Cell("nSAIQtd"):SetValue(0)
+										
+										aSalAtu[1]			+= (cAliasTOP)->QUANTIDADE
+										aSalAtu[7]			+= (cAliasTOP)->QUANT2UM
+									Else
+										oSection3:Cell("nENTQtd"):Hide()
+										oSection3:Cell("nENTQtd"):SetValue(0)
+										
+										oSection3:Cell("nSAIQtd"):Show()
+										
+										oSection3:Cell("nSAIQtd"):SetValue((cAliasTOP)->QUANTIDADE)
+										
+										aSalAtu[1]			-= (cAliasTOP)->QUANTIDADE
+										aSalAtu[7]			-= (cAliasTOP)->QUANT2UM
+									EndIf
+									If lCusUnif
+										lPriApropri:=.T.
+									EndIf
+								EndIf
+						EndCase
+						If lFirst  .And. lTransEnd
+							oSection3:Cell("nSALDQtd"):SetValue(aSalAtu[1])
+						EndIf
+						Do Case
+							Case Alltrim((cAliasTop)->ARQ) == "SD3" .And. !lContinua  .And. lTransEnd
+								oSection3:Cell("cNfNomeFor"):SetValue( "" )
+								If Empty((cAliasTOP)->OP) .And. Empty((cAliasTOP)->PROJETO)
+									If Empty( (cAliasTOP)->CC )
+									   SD7->(DbSetorder(3))
+										If SD7->(DbSeek( xFilial("SD7")+(cAliasTOP)->PRODUTO+(cAliasTOP)->SEQUENCIA+(cAliasTOP)->DOCUMENTO ))
+											If !Empty(SD7->D7_DOC)
+												oSection3:Cell("cCCPVPJOP"):SetValue('NF-'+SD7->D7_DOC)
+											EndIf
+			                        SA2->(DbSetOrder(1))
+			                        If SA2->(DbSeek( xFilial("SA2") + SD7->(D7_FORNECE+D7_LOJA) ))
+												oSection3:Cell("cNfNomeFor"):SetValue( SA2->A2_NOME )
+											EndIf
+										ElseIf Empty( (cAliasTOP)->CC ) .and. !Empty((cAliasTOP)->D3_OPTRANS)
+											oSection3:Cell("cCCPVPJOP"):SetValue('OP'+(cAliasTOP)->D3_OPTRANS)
+										Else
+											oSection3:Cell("cCCPVPJOP"):SetValue('CC'+(cAliasTOP)->CC)
+										Endif	
+									Else
+										oSection3:Cell("cCCPVPJOP"):SetValue('CC'+(cAliasTOP)->CC)
+									EndIf
+								ElseIf !Empty((cAliasTOP)->PROJETO)
+									oSection3:Cell("cCCPVPJOP"):SetValue('PJ'+(cAliasTOP)->PROJETO)
+								ElseIf !Empty((cAliasTOP)->OP)
+									oSection3:Cell("cCCPVPJOP"):SetValue('OP'+(cAliasTOP)->OP)
+								ElseIf Empty((cAliasTOP)->OP) .and. !Empty((cAliasTOP)->D3_OPTRANS)
+									oSection3:Cell("cCCPVPJOP"):SetValue('OP'+(cAliasTOP)->D3_OPTRANS)
+								EndIf
+							Case Alltrim((cAliasTop)->ARQ) == "SD1" .And. !lContinua .And. lTransEnd
+								cTipoNf := 'F-'
+								SD1->(dbGoTo((cAliasTop)->NRECNO))
+								SD2->(dbSetOrder(3))
+								If SD2->(dbSeek(xFilial("SD2")+SD1->D1_NFORI+SD1->D1_SERIORI+SD1->D1_FORNECE+SD1->D1_LOJA))
+									If SD2->D2_TIPO <> 'B'
+										cTipoNf := 'C-'
+									EndIf									
+								EndIf
+								oSection3:Cell("cCCPVPJOP"):SetValue(cTipoNf+(cAliasTOP)->FORNECEDOR)
+								If cTipoNf = 'F-'
+	                        SA2->(DbSetOrder(1))
+	                        If SA2->(DbSeek( xFilial("SA2") + (cAliasTOP)->(FORNECEDOR+LOJA) ))
+										oSection3:Cell("cNfNomeFor"):SetValue( SA2->A2_NOME )
+									Else
+										oSection3:Cell("cNfNomeFor"):SetValue( "" )
+									EndIf
+	                     Else
+	                        SA1->(DbSetOrder(1))
+	                        If SA1->(DbSeek( xFilial("SA1") + (cAliasTOP)->(FORNECEDOR+LOJA) ))
+										oSection3:Cell("cNfNomeFor"):SetValue( SA1->A1_NOME )
+									Else
+										oSection3:Cell("cNfNomeFor"):SetValue( "" )
+									EndIf
+	                     EndIf
+	                     
+							Case Alltrim((cAliasTop)->ARQ) == "SD2" .And. !lContinua .And. lTransEnd
+								//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+								//³N - QNC: 002117                                                       ³
+								//³Corrigida a ultima coluna do relatorio onde apresentava nas notas     ³
+								//³de saida o número do pedido de compra , ao invés de apresentar        ³
+								//³o codigo do cliente quando o D2_TIPO="N",                             ³
+								//³quando D2_TIPO="B" mostrar o codigo do fornecedor.                    ³
+								//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+								If ((cAliasTop)->TIPONF) $ "B|D"
+									oSection3:Cell("cCCPVPJOP"):SetValue('F-'+(cAliasTop)->FORNECEDOR)
+	                        SA2->(DbSetOrder(1))
+	                        If SA2->(DbSeek( xFilial("SA2") + (cAliasTOP)->(FORNECEDOR+LOJA) ))
+										oSection3:Cell("cNfNomeFor"):SetValue( SA2->A2_NOME )
+									Else
+										oSection3:Cell("cNfNomeFor"):SetValue( "" )
+									EndIf
+								Else
+									oSection3:Cell("cCCPVPJOP"):SetValue('C-'+(cAliasTop)->FORNECEDOR)
+	                        SA1->(DbSetOrder(1))
+	                        If SA1->(DbSeek( xFilial("SA1") + (cAliasTOP)->(FORNECEDOR+LOJA) ))
+										oSection3:Cell("cNfNomeFor"):SetValue( SA1->A1_NOME )
+									Else
+										oSection3:Cell("cNfNomeFor"):SetValue( "" )
+									EndIf
+								EndIf
+							Case lContinua .And. aDadosTran[14] == "SD3" .And. lTransEnd
+								oSection3:Cell("cNfNomeFor"):SetValue( "" )
+								If Empty(aDadosTran[11]) .And. Empty(aDadosTran[12])
+									If Empty( aDadosTran[13] )
+									   SD7->(DbSetorder(3))
+										If SD7->(DbSeek( xFilial("SD7")+aDadosTran[10]+aDadosTran[08]+aDadosTran[09] ))
+											If !Empty(SD7->D7_DOC)
+												oSection3:Cell("cCCPVPJOP"):SetValue('NF-'+SD7->D7_DOC)
+											EndIf
+			                        SA2->(DbSetOrder(1))
+			                        If SA2->(DbSeek( xFilial("SA2") + SD7->(D7_FORNECE+D7_LOJA) ))
+												oSection3:Cell("cNfNomeFor"):SetValue( SA2->A2_NOME )
+											EndIf
+										ElseIf Empty(aDadosTran[13]) .and. !Empty(aDadosTran[19])
+											oSection3:Cell("cCCPVPJOP"):SetValue('OP'+aDadosTran[19])
+										Else
+											oSection3:Cell("cCCPVPJOP"):SetValue('CC'+aDadosTran[13])
+										Endif	
+									Else
+										oSection3:Cell("cCCPVPJOP"):SetValue('CC'+aDadosTran[13])
+									EndIf
+								ElseIf !Empty(aDadosTran[12])
+									oSection3:Cell("cCCPVPJOP"):SetValue('PJ'+aDadosTran[12])
+								ElseIf !Empty(aDadosTran[11])
+									oSection3:Cell("cCCPVPJOP"):SetValue('OP'+aDadosTran[11])
+
+								ElseIf !Empty(aDadosTran[11]) .and. Empty(aDadosTran[19])
+									oSection3:Cell("cCCPVPJOP"):SetValue('OP'+aDadosTran[19])
+
+								EndIf
+						EndCase
+						
+						If lFirst .And. lTransEnd
+							oSection3:PrintLine()
+						Endif
+						lTransEnd := .T.
+						
+						If !lInverteMov .Or. (lInverteMov .And. lPriApropri)
+							If !lContinua //Acerto para utilizar o Array aDadosTranf[]
+								dbSkip()
+							EndIf
+						EndIf
+					EndDo
+					
+					If lFirst
+						//oReport:PrintText(STR0022+TransForm(aSalAtu[7],cPicB2Qt2),,oSection3:Cell('nSAIQtd'):ColPos()) //"QTD. NA SEGUNDA UM: "
+					Else
+						//If !MTR900IsMNT() .Or. (MTR900IsMNT().And. SB1->B1_COD <> cProdMNT .And. SB1->B1_COD <> cProdTER)
+						//	oReport:PrintText(STR0023)	//"NAO HOUVE MOVIMENTACAO PARA ESTE PRODUTO"
+						//	oReport:ThinLine()
+						//	lImpSMov := .T.
+						//EndIf
+					EndIf
+					
+					oSection1:Finish()
+					oSection2:Finish()
+					If !lImpSMov
+						oSection3:Finish()
+					Endif
+				EndDo
+				dbSelectArea(cAliasTop)
+//--------------------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------
+//              fim do IF TOP
+//--------------------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------
+			#ELSE
+				dbSelectArea("SD1")
+				If 1=1 // mv_par11 == 1
+					dbSetOrder(5)
+				Else
+					If lCusUnif
+						cIndice:="D1_FILIAL+D1_COD+D1_SEQCALC+D1_NUMSEQ"
+					Else
+						cIndice:="D1_FILIAL+D1_COD+D1_LOCAL+D1_SEQCALC+D1_NUMSEQ"
+					EndIf
+					INDREGUA("SD1",cTrbSD1,cIndice,,DBFilter(),"Selecionando Registros")	//
+					nInd := RetIndex("SD1")
+					#IFNDEF TOP
+			  		   dbSetIndex(cTrbSD1+OrdBagExt())
+					#ENDIF
+					dbSetOrder(nInd+1)
+				EndIf
+				
+				dbSelectArea("SD2")
+				If 1=1 // mv_par11 == 1
+					dbSetOrder(1)
+				Else
+					If lCusUnif
+						cIndice:="D2_FILIAL+D2_COD+D2_SEQCALC+D2_NUMSEQ"
+					Else
+						cIndice:="D2_FILIAL+D2_COD+D2_LOCAL+D2_SEQCALC+D2_NUMSEQ"
+					EndIf
+					INDREGUA("SD2",cTrbSD2,cIndice,,,"Selecionando Registros")	//
+					nInd := RetIndex("SD2")
+					#IFNDEF TOP
+					  dbSetIndex(cTrbSD2+OrdBagExt())
+					#ENDIF
+					dbSetOrder(nInd+1)
+				EndIf
+				
+				dbSelectArea("SD3")
+			
+				If 1=1 // mv_par11 == 1
+					dbSetOrder(3)
+				Else
+					If lCusUnif
+						cIndice:="D3_FILIAL+D3_COD+D3_SEQCALC+D3_NUMSEQ"
+					Else
+						cIndice:="D3_FILIAL+D3_COD+D3_LOCAL+D3_SEQCALC+D3_NUMSEQ"
+					EndIf
+			
+					IndRegua("SD3",cTrbSD3,cIndice,,,"Selecionando Registros")	//
+			
+					nInd := RetIndex("SD3")
+					#IFNDEF TOP
+			     	  dbSetIndex(cTrbSD3+OrdBagExt())
+			 		#ENDIF
+				    dbSetOrder(nInd+1)
+				EndIf
+				
+				dbSelectArea("SB1")
+				If ! lVEIC
+					If nOrdem == 1
+						dbSetOrder(1)
+						dbseek(cFilial+mv_par01)
+						cOrder := IndexKey()
+					ElseIf nOrdem == 2
+						dbSetOrder(2)
+						dbseek(cFilial+mv_par03)
+						cOrder := IndexKey()
+					EndIf  
+				Else
+					If nOrdem == 1
+						cOrder := "B1_FILIAL+B1_CODITE"
+					ElseIf nOrdem == 2
+						cOrder := "B1_FILIAL+B1_TIPO+B1_CODITE"
+					EndIf  
+				EndIf
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³Transforma parametros Range em expressao Advpl                          ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				MakeAdvplExpr(oReport:uParam)
+			
+				cCondicao := 'B1_FILIAL == "'+xFilial("SB1")+'".And.' 
+				cCondicao += 'B1_TIPO >= "'+mv_par03+'".And.B1_TIPO <="'+mv_par04+'".And.'
+				If ! lVEIC
+					cCondicao += 'B1_COD >= "'+mv_par01+'".And.B1_COD <="'+mv_par02+'".And.'
+				Else
+					cCondicao += 'B1_CODITE >= "'+mv_par01+'".And.B1_CODITE <="'+mv_par02+'".And.'
+				Endif	
+				cCondicao += 'B1_GRUPO >= "'+mv_par12+'".And.B1_GRUPO <="'+mv_par13+'".And.'	
+				cCondicao += 'B1_COD <> "'+Substr(cProdImp,1,Len(B1_COD))+'"'
+			
+				oReport:Section(1):SetFilter(cCondicao,cOrder)
+				
+				dbSelectArea("SB1")
+				oReport:SetMeter(nTotRegs)
+				
+				While !oReport:Cancel() .And. SB1->(!Eof())
+					
+					If oReport:Cancel()
+						Exit
+					EndIf
+					
+					oReport:IncMeter()
+					
+					dbSelectArea("SB2")
+					//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+					//³ Se nao encontrar no arquivo de saldos ,nao lista ³
+					//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+					If !dbSeek(xFilial("SB2")+SB1->B1_COD+IF(lCusUnif,"",mv_par08))
+						dbSelectArea("SB1")
+						dbSkip()
+						Loop
+					EndIf
+					
+					cProdAnt  := SB1->B1_COD
+					cLocalAnt := B2_LOCAL
+					
+					dbSelectArea("SD1")
+					dbSeek(cFilial+SB1->B1_COD+If(lCusUnif,"",SB2->B2_LOCAL))
+					dbSelectArea("SD2")
+					dbSeek(cFilial+SB1->B1_COD+If(lCusUnif,"",SB2->B2_LOCAL))
+					dbSelectArea("SD3")
+					dbSeek(cFilial+SB1->B1_COD+If(lCusUnif.Or.lLocProc,"",SB2->B2_LOCAL))
+					
+					oSection3:Init()
+					While .T.
+						lImpSMov := .F.
+						lImpS3   := .F.
+						dbSelectArea("SD1")
+						If !Eof() .and. D1_FILIAL == xFilial("SD1") .and. D1_COD = cProdAnt .and. If(lCusUnif,.T.,D1_LOCAL = cLocalAnt)
+							
+							//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+							//³ Despreza Notas Fiscais Lancadas Pelo Modulo do Livro Fiscal  ³
+							//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+							dbSelectArea("SF4")
+							dbSeek(xFilial("SF4")+SD1->D1_TES)
+							dbSelectArea("SD1")
+							//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+							//³ Executa ponto de entrada para verificar se considera TES que ³
+							//³ NAO ATUALIZA saldos em estoque.                              ³
+							//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+							If lIxbConTes .And. SF4->F4_ESTOQUE != "S"
+								lTesNEst := ExecBlock("MTAAVLTES",.F.,.F.)
+								lTesNEst := If(ValType(lTesNEst) # "L",.F.,lTesNEst)
+							EndIf
+							
+							If D1_ORIGLAN $ "LF" .Or. (SF4->F4_ESTOQUE != "S" .And. !lTesNEst)
+								dbSkip()
+								Loop
+							Else
+								If D1_DTDIGIT < mv_par05 .or. D1_DTDIGIT > mv_par06
+									dbSkip()
+									loop
+								Else
+									//cSeqIni := IIf(mv_par11==1,D1_NUMSEQ,D1_SEQCALC+D1_NUMSEQ)
+									cSeqIni := IIf( 1=1 , D1_NUMSEQ , D1_SEQCALC+D1_NUMSEQ)
+									cAlias := Alias()
+								Endif
+							EndIf
+						EndIf
+						
+						dbSelectArea("SD2")
+						If !Eof() .and. D2_FILIAL == xFilial("SD2") .and. D2_COD = cProdAnt .and. If(lCusUnif,.T.,D2_LOCAL = cLocalAnt)
+							
+							dbSelectArea("SF4")
+							dbSeek(cFilial+SD2->D2_TES)
+							dbSelectArea("SD2")
+							
+							//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+							//³ Despreza Notas Fiscais Lancadas Pelo Modulo do Livro Fiscal  ³
+							//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+							//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+							//³ Executa ponto de entrada para verificar se considera TES que ³
+							//³ NAO ATUALIZA saldos em estoque.                              ³
+							//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+							If lIxbConTes .And. SF4->F4_ESTOQUE != "S"
+								lTesNEst := ExecBlock("MTAAVLTES",.F.,.F.)
+								lTesNEst := If(ValType(lTesNEst) # "L",.F.,lTesNEst)
+							EndIf
+							
+							If D2_ORIGLAN == "LF" .Or. (SF4->F4_ESTOQUE != "S" .And. !lTesNEst)
+								dbSkip()
+								Loop
+							Else
+								If D2_EMISSAO < mv_par05 .or. D2_EMISSAO > mv_par06
+									dbSkip()
+									Loop
+								Else
+									If 1=1 // mv_par11 == 1
+										If D2_NUMSEQ < cSeqIni
+											cSeqIni := D2_NUMSEQ
+											cAlias  := Alias()
+										Endif
+									Else
+										If D2_SEQCALC+D2_NUMSEQ < cSeqIni
+											cSeqIni := D2_SEQCALC+D2_NUMSEQ
+											cAlias  := Alias()
+										EndIf
+									EndIf
+								EndIf
+							EndIf
+						EndIf
+						
+						dbSelectArea("SD3")
+						If !Eof() .and. D3_FILIAL == xFilial("SD3") .and. D3_COD = cProdAnt .and. If(lCusUnif.Or.lLocProc,.T.,D3_LOCAL = cLocalAnt)
+							//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+							//³ Quando movimento ref apropr. indireta, so considera os         ³
+							//³ movimentos com destino ao almoxarifado de apropriacao indireta.³
+							//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+							lInverteMov:=.F.
+							If D3_LOCAL != cLocalAnt .Or. lCusUnif
+								If !(Substr(D3_CF,3,1) == "3")
+									If !lCusUnif
+										dbSkip()
+										Loop
+									EndIf
+								ElseIf lPriApropri
+									lInverteMov:=.T.
+								EndIf
+							EndIf
+							
+							If D3_EMISSAO < mv_par05 .or. D3_EMISSAO > mv_par06
+								dbSkip()
+								Loop
+							EndIf
+							// VALIDACAO TRATAMENTO SE CONSIDERA OS ESTORNO E SE CONSIDERA MOVIMENTOS WMS
+							If !D3Valido()
+								dbSkip()
+								Loop
+							EndIf
+							
+							//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+							//³ Caso seja uma transferencia de localizacao verifica se lista   ³
+							//³ o movimento ou nao                                             ³
+							//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+							If mv_par11 == 2 .And. Substr(D3_CF,3,1) == "4"
+								cNumSeqTr := SD3->D3_COD+SD3->D3_NUMSEQ+SD3->D3_LOCAL
+								nRegTr    := Recno()
+								dbSkip()
+								If SD3->D3_COD+SD3->D3_NUMSEQ+SD3->D3_LOCAL == cNumSeqTr
+									dbSkip()
+									Loop
+								Else
+									dbGoto(nRegTr)
+								EndIf
+							EndIf
+							If 1=1 // mv_par11 == 1
+								If D3_NUMSEQ < cSeqIni
+									cSeqIni := D3_NUMSEQ
+									cAlias  := Alias()
+								EndIf
+							Else
+								If D3_SEQCALC+D3_NUMSEQ < cSeqIni
+									cSeqIni := D3_SEQCALC+D3_NUMSEQ
+									cAlias  := Alias()
+								EndIf
+							EndIf
+						EndIf
+						
+						If !Empty(cAlias)
+							dbSelectArea(cAlias)
+							cCampo1 := Subs(cAlias,2,2)+IIf(cAlias=="SD1","_DTDIGIT","_EMISSAO")
+							cCampo2 := Subs(cAlias,2,2)+"_TES"
+							cCampo3 := Subs(cAlias,2,2)+"_CF"
+							cCampo4 := Subs(cAlias,2,2)+IIf(mv_par09 $ "Ss","_NUMSEQ","_DOC" )
+							
+							If lFirst
+								MR900ImpS1(@aSalAtu,,.F.,lVEIC,lCusUnif,oSection1,oSection2,oReport)
+								lFirst  := .F.
+								lFirst1 := .F.
+							EndIf
+							
+							oSection3:Cell("dDtMov"):SetValue(&cCampo1)
+							If cAlias == "SD3"
+								oSection3:Cell("cTES"):SetValue(D3_TM)
+								Do Case
+									Case D3_TM <= "500" .and. D3_CF $ 'PR0/ER0/PR1/ER1'
+										oSection3:Cell("cTESTexto"):SetValue("PRODUCAO")
+									Case D3_TM > "500" .and. D3_CF $ 'PR0/ER0/PR1/ER1'
+										oSection3:Cell("cTESTexto"):SetValue("DEVOLUCAO PARA PRODUCAO")
+									Case D3_TM <= "500" .and. D3_CF $ 'RE4/DE4/RE7/DE7'
+										oSection3:Cell("cTESTexto"):SetValue("PRODUCAO")
+									Case D3_TM > "500" .and. D3_CF $ 'RE4/DE4/RE7/DE7'
+										oSection3:Cell("cTESTexto"):SetValue("DEVOLUCAO PARA PRODUCAO")
+									OtherWise
+										oSection3:Cell("cTESTexto"):SetValue(" WHILE-TESTE DE TIPO DE MOVIMENTO ")
+								EndCase
+							Else
+								oSection3:Cell("cTES"):SetValue(&cCampo2)
+								oSection3:Cell("cTESTexto"):SetValue(TES_TEXTO)
+							EndIf
+							
+							If ( cPaisLoc=="BRA" )
+								oSection3:Cell("cCF"):Show()
+								oSection3:Cell("cCF"):SetValue(&cCampo3)
+							Else
+								oSection3:Cell("cCF"):Hide()
+								oSection3:Cell("cCF"):SetValue("   ")
+							EndIf
+							oSection3:Cell("cDoc"):SetValue(&cCampo4)
+							
+							Do Case
+								Case cAlias = "SD1"
+									lDev:=MTR900Dev("SD1")
+									If D1_TES <= "500" .And. !lDev
+										If SF1->F1_TIPO != "C"
+										Else
+										EndIf
+										
+										oSection3:Cell("nENTQtd"):Show()
+										//oSection3:Cell("nENTCus"):Show()
+										
+										oSection3:Cell("nENTQtd"):SetValue(D1_QUANT)
+										
+										oSection3:Cell("nSAIQtd"):Hide()
+										//oSection3:Cell("nSAICus"):Hide()
+										oSection3:Cell("nSAIQtd"):SetValue(0)
+										//oSection3:Cell("nSAICus"):SetValue(0)
+										
+										aSalAtu[1] 			+= D1_QUANT
+										aSalAtu[7]			+= D1_QTSEGUM
+									Else
+										If SF1->F1_TIPO != "C"
+										Else
+										EndIf
+										oSection3:Cell("nENTQtd"):Hide()
+										//oSection3:Cell("nENTCus"):Hide()
+										oSection3:Cell("nENTQtd"):SetValue(0)
+										//oSection3:Cell("nENTCus"):SetValue(0)
+										
+										oSection3:Cell("nSAIQtd"):Show()
+										//oSection3:Cell("nSAICus"):Show()
+										
+										If lDev
+											oSection3:Cell("nSAIQtd"):SetValue(D1_QUANT * -1)
+			
+											aSalAtu[1]			+= D1_QUANT
+											aSalAtu[7]			+= D1_QTSEGUM
+										Else
+											oSection3:Cell("nSAIQtd"):SetValue(D1_QUANT)
+			
+											aSalAtu[1]			-= D1_QUANT
+											aSalAtu[7]			-= D1_QTSEGUM
+										EndIf
+									EndIf
+								Case cAlias = "SD2"
+									lDev:=MTR900Dev("SD2")
+									If D2_TES <= "500" .Or. lDev
+										oSection3:Cell("nSAIQtd"):Hide()
+										//oSection3:Cell("nSAICus"):Hide()
+										oSection3:Cell("nSAIQtd"):SetValue(0)
+										//oSection3:Cell("nSAICus"):SetValue(0)
+										
+										oSection3:Cell("nENTQtd"):Show()
+										//oSection3:Cell("nENTCus"):Show()
+										If lDev
+											oSection3:Cell("nENTQtd"):SetValue(D2_QUANT  * -1)
+											
+											aSalAtu[1]			-= D2_QUANT
+											aSalAtu[7]			-= D2_QTSEGUM
+										Else
+											oSection3:Cell("nENTQtd"):SetValue(D2_QUANT)
+											
+											aSalAtu[1]			+= D2_QUANT
+											aSalAtu[7]			+= D2_QTSEGUM
+										EndIf
+										If SF2->F2_TIPO != "C"
+										Else
+										EndIf
+									Else
+										oSection3:Cell("nENTQtd"):Hide()
+										//oSection3:Cell("nENTCus"):Hide()
+										oSection3:Cell("nENTQtd"):SetValue(0)
+										//oSection3:Cell("nENTCus"):SetValue(0)
+										
+										oSection3:Cell("nSAIQtd"):Show()
+										//oSection3:Cell("nSAICus"):Show()
+										
+										If SF2->F2_TIPO != "C"
+										Else
+										EndIf
+										
+										oSection3:Cell("nSAIQtd"):SetValue(D2_QUANT)
+			
+										aSalAtu[1]			-= D2_QUANT
+										aSalAtu[7]			-= D2_QTSEGUM
+									EndIf
+								Otherwise
+									lDev := .F.
+									If	lInverteMov
+										If D3_TM > "500"
+											
+											oSection3:Cell("nENTQtd"):Show()
+											//oSection3:Cell("nENTCus"):Show()
+											//oSection3:Cell("nCusMov"):Show()
+											
+											oSection3:Cell("nENTQtd"):SetValue(D3_QUANT)
+											
+											oSection3:Cell("nSAIQtd"):Hide()
+											//oSection3:Cell("nSAICus"):Hide()
+											oSection3:Cell("nSAIQtd"):SetValue(0)
+											//oSection3:Cell("nSAICus"):SetValue(0)
+											
+											aSalAtu[1]			+= D3_QUANT
+											aSalAtu[7]			+= D3_QTSEGUM
+										Else
+											oSection3:Cell("nENTQtd"):Hide()
+											//oSection3:Cell("nENTCus"):Hide()
+											oSection3:Cell("nENTQtd"):SetValue(0)
+											//oSection3:Cell("nENTCus"):SetValue(0)
+											
+											//oSection3:Cell("nCusMov"):Show()
+											oSection3:Cell("nSAIQtd"):Show()
+											//oSection3:Cell("nSAICus"):Show()
+											
+											oSection3:Cell("nSAIQtd"):SetValue(D3_QUANT)
+											
+											aSalAtu[1]			-= D3_QUANT
+											aSalAtu[7]			-= D3_QTSEGUM
+										EndIf
+										If lCusUnif
+											lPriApropri:=.F.
+										EndIf
+									Else
+										If D3_TM <= "500"
+											
+											oSection3:Cell("nENTQtd"):Show()
+											//oSection3:Cell("nENTCus"):Show()
+											//oSection3:Cell("nCusMov"):Show()
+											
+											oSection3:Cell("nENTQtd"):SetValue(D3_QUANT)
+											
+											oSection3:Cell("nSAIQtd"):Hide()
+											//oSection3:Cell("nSAICus"):Hide()
+											oSection3:Cell("nSAIQtd"):SetValue(0)
+											//oSection3:Cell("nSAICus"):SetValue(0)
+											
+											aSalAtu[1]			+= D3_QUANT
+											aSalAtu[7]			+= D3_QTSEGUM
+										Else
+											oSection3:Cell("nENTQtd"):Hide()
+											//oSection3:Cell("nENTCus"):Hide()
+											oSection3:Cell("nENTQtd"):SetValue(0)
+											//oSection3:Cell("nENTCus"):SetValue(0)
+											
+											//oSection3:Cell("nCusMov"):Show()
+											oSection3:Cell("nSAIQtd"):Show()
+											//oSection3:Cell("nSAICus"):Show()
+											
+											oSection3:Cell("nSAIQtd"):SetValue(D3_QUANT)
+											
+											aSalAtu[1]			-= D3_QUANT
+											aSalAtu[7]			-= D3_QTSEGUM
+										EndIf
+										If lCusUnif
+											lPriApropri:=.T.
+										EndIf
+									EndIf
+							EndCase
+							
+							oSection3:Cell("nSALDQtd"):SetValue(aSalAtu[1])
+							
+							Do Case
+								Case cAlias = "SD3"  && movimentos (SD3)
+									If Empty(D3_OP) .And. Empty(D3_PROJPMS)
+										oSection3:Cell("cCCPVPJOP"):SetValue('CC'+D3_CC)
+									ElseIf !Empty(D3_PROJPMS)
+										oSection3:Cell("cCCPVPJOP"):SetValue('PJ'+D3_PROJPMS)
+									ElseIf !Empty(D3_OP)
+										oSection3:Cell("cCCPVPJOP"):SetValue('OP'+D3_OP)
+									EndIf
+								Case cAlias = "SD1"  && compras    (SD1)
+									cTipoNf := 'F-'
+									aAreaSD2:=SD2->(GetArea())
+									SD2->(dbSetOrder(3))
+									If SD2->(dbSeek(xFilial("SD2")+SD1->D1_NFORI+SD1->D1_SERIORI+SD1->D1_FORNECE+SD1->D1_LOJA))
+										If !(SD2->D2_TIPO $ 'B|D')
+											cTipoNf := 'C-'
+										EndIf									
+									EndIf
+									RestArea(aAreaSD2)
+									dbSelectArea('SD1')
+									oSection3:Cell("cCCPVPJOP"):SetValue(cTipoNf+D1_FORNECE)
+								Case cAlias = "SD2"  && vendas     (SD2)
+									If D2_TIPO $ "B|D"
+										oSection3:Cell("cCCPVPJOP"):SetValue('F-'+D2_CLIENTE)
+									Else
+										oSection3:Cell("cCCPVPJOP"):SetValue('C-'+D2_CLIENTE)
+									EndIf
+							EndCase
+				
+							cSeqIni := Replicate("z",6)
+							cAlias := ""
+							
+							If !lImpSMov
+								oSection3:PrintLine()
+							Endif
+							
+							If !lInverteMov .Or. (lInverteMov .And. lPriApropri)
+								dbSkip()
+							EndIf
+						Else
+							If !lFirst
+								//oReport:PrintText(STR0022+AllTrim(TransForm(aSalAtu[7],cPicB2Qt2)),,oSection3:Cell('nSAICus'):ColPos()) //"QTD. NA SEGUNDA UM: "
+								//oReport:PrintText(STR0022+AllTrim(TransForm(aSalAtu[7],cPicB2Qt2)),,oSection3:Cell('nSAIQtd'):ColPos()) //"QTD. NA SEGUNDA UM: "
+								lImpS3 := .T.
+							Else
+								//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+								//³ Verifica se deve ou nao listar os produtos s/movimento ³
+								//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+								If mv_par07 == 1
+									MR900ImpS1(@aSalAtu,,.F.,lVEIC,lCusUnif,oSection1,oSection2,oReport)
+									
+									If !MTR900IsMNT() .Or. (MTR900IsMNT().And. SB1->B1_COD <> cProdMNT .And. SB1->B1_COD <> cProdTER)
+										oReport:PrintText("NAO HOUVE MOVIMENTACAO PARA ESTE PRODUTO")	//
+										oReport:ThinLine()
+										lImpSMov := .T.
+									EndIf	
+									
+								EndIf
+							EndIf
+							Exit
+						EndIf
+					EndDo
+					lFirst  := .T.
+					oSection1:Finish()
+					oSection2:Finish()
+					If !lImpSMov .And. lImpS3
+						oSection3:Finish()
+					EndIf
+					
+					dbSelectArea("SB1")
+					dbSkip()
+				EndDo
+				
+				dbSelectArea("SD1")
+				If !Empty(cTrbSD1) .And. File(cTrbSD1 + OrdBagExt())
+					RetIndex("SD1")
+					Ferase(cTrbSD1+OrdBagExt())
+				EndIf
+				dbSetOrder(1)
+				dbSelectArea("SD2")
+				If !Empty(cTrbSD2) .And. File(cTrbSD2 + OrdBagExt())
+					RetIndex("SD2")
+					Ferase(cTrbSD2+OrdBagExt())
+				EndIf
+				dbSetOrder(1)
+				dbSelectArea("SD3")
+				If !Empty(cTrbSD3) .And. File(cTrbSD2 + OrdBagExt())
+					RetIndex("SD3")
+					Ferase(cTrbSD3+OrdBagExt())
+				EndIf
+				dbSetOrder(1)	
+			#ENDIF		
+
+		EndIf
+        
+        #IFDEF TOP
+	    	If Select(cAliasTop)>0
+	    		dbSelectArea(cAliasTop)
+	       		dbCloseArea() 
+	       	Endif 
+		#ENDIF
+	Next nForFilial
+	
+EndIf
+
+// Restaura Filial Corrente
+cFilAnt := cFilBack
+
+Return NIL
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³MR900ImpS1³ Autor ³ Nereu Humberto Junior ³ Data ³ 25/07/06 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Imprime a secao 1 e 2 (Dados do produto)                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³MR900ImpS1(@ExpA1,ExpC1,ExpL1,ExpL2,ExpL3,ExpO1,ExpO2,ExpO3)³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ ExpA1 = Array com informacoes do saldo inicial do item     ³±±
+±±³          ³   [1] = Saldo inicial em quantidade                        ³±±
+±±³          ³   [2] = Saldo inicial em valor                             ³±±
+±±³          ³   [3] = Saldo inicial na 2a unidade de medida              ³±±
+±±³          ³ ExpC1 = Alias                                              ³±±
+±±³          ³ ExpL1 = Top                                                ³±±
+±±³          ³ ExpL2 = Veiculo                                            ³±±
+±±³          ³ ExpL3 = Custo Unificado                                    ³±±
+±±³          ³ ExpO1 = Secao 1                                            ³±±
+±±³          ³ ExpO2 = Secao 2                                            ³±±
+±±³          ³ ExpO3 = obj Report                                         ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ MATR900                                                    ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Static Function MR900ImpS1(aSalAtu,cAliasTop,lQuery,lVEIC,lCusUnif,oSection1,oSection2,oReport)
+
+Local aArea     := GetArea()
+//Local nCusMed   := 0,i:=0
+Local aSalAlmox :={}
+Local cSeek     :=""
+LOCAL i 		:= 0
+
+DEFAULT lQuery := .F.
+DEFAULT cAliasTop:="SB1"
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Calcula o Saldo Inicial do Produto             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+If lCusUnif
+	aArea:=GetArea()
+	aSalAtu  := { 0,0,0,0,0,0,0 }
+	dbSelectArea("SB2")
+	dbSetOrder(1)
+	dbSeek(cSeek:=xFilial("SB2") + If(lQuery,(cAliasTOP)->PRODUTO,SB1->B1_COD))
+	While !Eof() .And. B2_FILIAL+B2_COD == cSeek
+		aSalAlmox := CalcEst(If(lQuery,(cAliasTOP)->PRODUTO,SB1->B1_COD),SB2->B2_LOCAL,mv_par05,,, .F. )
+		For i:=1 to Len(aSalAtu)
+			aSalAtu[i] += aSalAlmox[i]
+		Next i
+		dbSkip()
+	End
+	RestArea(aArea)
+Else
+	aSalAtu := CalcEst(If(lQuery,(cAliasTOP)->PRODUTO,SB1->B1_COD),mv_par08,mv_par05,,, .F. )
+EndIf
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Calcula o Custo de Reposicao do Produto        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+If .F. // lCusRep .And. mv_par17==2
+	aSalAtu := {aSalAtu[1],aSalAtu[18],aSalAtu[19],aSalAtu[20],aSalAtu[21],aSalAtu[22],aSalAtu[07]}
+EndIf
+	
+oSection1:Init()
+oSection2:Init()
+
+//oSection1:Cell("nCusMed"):SetValue(nCusMed)
+oSection1:Cell("nQtdSal"):SetValue(aSalAtu[1])
+//oSection1:Cell("nVlrSal"):SetValue(aSalAtu[mv_par10+1])			
+
+#IFDEF TOP
+	oSection1:Cell("cProduto"	):SetValue((cAliasTop)->PRODUTO)			
+	oSection1:Cell("cTipo"		):SetValue((cAliasTop)->TIPO	)
+	If lVEIC
+		oSection2:Cell("cProduto"	):SetValue((cAliasTop)->PRODUTO)			
+		oSection2:Cell("cTipo"		):SetValue((cAliasTop)->TIPO	)
+	Endif
+	
+	dbSelectArea("SB2")
+	dbSeek(xFilial("SB2")+(cAliasTop)->PRODUTO+If(lCusUnif,"",mv_par08))
+#ELSE 
+	oSection1:Cell("cProduto"	):SetValue(SB1->B1_COD)			
+	oSection1:Cell("cTipo"		):SetValue(SB1->B1_TIPO)
+	If lVEIC
+		oSection2:Cell("cProduto"	):SetValue(SB1->B1_COD)			
+		oSection2:Cell("cTipo"		):SetValue(SB1->B1_TIPO)
+	EndIf
+#ENDIF
+
+oSection1:PrintLine()
+//oSection2:PrintLine()
+
+RestArea(aArea)
+
+RETURN
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ MTR900Dev³ Autor ³ Rodrigo de A. Sartorio³ Data ³ 17/07/98 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³Avalia se item pertence a uma nota de devolu‡ao             ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³ MTR900Dev(ExpC1,ExpC2)				                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Parametros³ ExpC1 = Alias                                              ³±±
+±±³          ³ ExpC2 = Alias Top                                          ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Retorno   ³ .T. / .F.                                                  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ MATR900                                                    ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Static Function MTR900Dev(cAlias,cAliasTop)
+Static lListaDev := NIL
+
+Local lRet:=.F.
+Local cSeek:= If(!Empty(cAliasTop),(cAliasTop)->DOCUMENTO+(cAliasTop)->SERIE+(cAliasTop)->FORNECEDOR+(cAliasTop)->LOJA,"")
+
+// Identifica se lista dev. na mesma coluna
+lListaDev := If(ValType(lListaDev)#"L",GetMV("MV_LISTDEV"),lListaDev)
+
+If lListaDev .And. cAlias == "SD1"
+	dbSelectArea("SF1")
+	If Empty(cSeek)
+		cSeek:=SD1->D1_DOC+SD1->D1_SERIE+SD1->D1_FORNECE+SD1->D1_LOJA
+	EndIf
+	If dbSeek(xFilial("SF1") + cSeek) .And. SF1->F1_TIPO == "D"
+		lRet:=.T.
+	EndIf
+ElseIf lListaDev .And. cAlias == "SD2"
+	dbSelectArea("SF2")
+	If Empty(cSeek)
+		cSeek:=+SD2->D2_DOC+SD2->D2_SERIE+SD2->D2_CLIENTE+SD2->D2_LOJA
+	EndIf
+	If dbSeek(xFilial("SF2") + cSeek) .And. SF2->F2_TIPO == "D"
+		lRet:=.T.
+	EndIf
+EndIf
+dbSelectArea(If(Empty(cAliasTop),cAlias,cAliasTop))
+Return lRet
+
